@@ -1,0 +1,574 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Profile server",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/movies": {
+            "get": {
+                "description": "Get All Movie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Movies",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search Movie",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Movie",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit Movie",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort Movie",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Movies"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/:id": {
+            "get": {
+                "description": "Updated Movies",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "actors",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "author",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "duration",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Action",
+                        "name": "genre",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Spiderman.jpg",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "release_date",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "film action universal",
+                        "name": "synopsis",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release_date time.Time `json:\"release_date\" form:\"release_date\"`\nDuration     time.Time `json:\"duration\" form:\"duration\"`",
+                        "name": "tag",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Spiderman",
+                        "name": "tittle",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.Movie_Data"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add Movies",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "actors",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "author",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "duration",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Action",
+                        "name": "genre",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Spiderman.jpg",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "release_date",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "film action universal",
+                        "name": "synopsis",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release_date time.Time `json:\"release_date\" form:\"release_date\"`\nDuration     time.Time `json:\"duration\" form:\"duration\"`",
+                        "name": "tag",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Spiderman",
+                        "name": "tittle",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.Movie_Data"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete One Movie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Delete Movie",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Movies"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get Profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.PointProfile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update Movies",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "salah@mail.com",
+                        "name": "email",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Salah",
+                        "name": "first_name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "salah.jpg",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Alaudin",
+                        "name": "last_name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Salah1!",
+                        "name": "password",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "phone_number",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.Profile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controllers.Response": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "page_info": {},
+                "results": {},
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.Movie_Data": {
+            "type": "object",
+            "properties": {
+                "actors": {
+                    "type": "string"
+                },
+                "author": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "genre": {
+                    "type": "string",
+                    "example": "Action"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "Spiderman.jpg"
+                },
+                "release_date": {
+                    "type": "string"
+                },
+                "synopsis": {
+                    "type": "string",
+                    "example": "film action universal"
+                },
+                "tag": {
+                    "description": "Release_date time.Time `json:\"release_date\" form:\"release_date\"`\nDuration     time.Time `json:\"duration\" form:\"duration\"`",
+                    "type": "string"
+                },
+                "tittle": {
+                    "type": "string",
+                    "example": "Spiderman"
+                }
+            }
+        },
+        "models.Movies": {
+            "type": "object",
+            "properties": {
+                "actors": {
+                    "type": "string"
+                },
+                "author": {
+                    "type": "string"
+                },
+                "genre": {
+                    "type": "string",
+                    "example": "Action"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "Spiderman.jpg"
+                },
+                "synopsis": {
+                    "type": "string",
+                    "example": "film action universal"
+                },
+                "tag": {
+                    "description": "Release_date time.Time `json:\"release_date\" form:\"release_date\"`\nDuration     time.Time `json:\"duration\" form:\"duration\"`",
+                    "type": "string"
+                },
+                "tittle": {
+                    "type": "string",
+                    "example": "Spiderman"
+                }
+            }
+        },
+        "models.PointProfile": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "salah@mail.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "Salah"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "salah.jpg"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Alaudin"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "Salah1!"
+                },
+                "phone_number": {
+                    "type": "integer"
+                },
+                "point": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Profile": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "salah@mail.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "Salah"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "salah.jpg"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Alaudin"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "Salah1!"
+                },
+                "phone_number": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

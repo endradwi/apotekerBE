@@ -1,0 +1,369 @@
+basePath: /
+definitions:
+  controllers.Response:
+    properties:
+      message:
+        type: string
+      page_info: {}
+      results: {}
+      success:
+        type: boolean
+    type: object
+  models.Movie_Data:
+    properties:
+      actors:
+        type: string
+      author:
+        type: string
+      duration:
+        type: string
+      genre:
+        example: Action
+        type: string
+      id:
+        type: integer
+      image:
+        example: Spiderman.jpg
+        type: string
+      release_date:
+        type: string
+      synopsis:
+        example: film action universal
+        type: string
+      tag:
+        description: |-
+          Release_date time.Time `json:"release_date" form:"release_date"`
+          Duration     time.Time `json:"duration" form:"duration"`
+        type: string
+      tittle:
+        example: Spiderman
+        type: string
+    type: object
+  models.Movies:
+    properties:
+      actors:
+        type: string
+      author:
+        type: string
+      genre:
+        example: Action
+        type: string
+      id:
+        type: integer
+      image:
+        example: Spiderman.jpg
+        type: string
+      synopsis:
+        example: film action universal
+        type: string
+      tag:
+        description: |-
+          Release_date time.Time `json:"release_date" form:"release_date"`
+          Duration     time.Time `json:"duration" form:"duration"`
+        type: string
+      tittle:
+        example: Spiderman
+        type: string
+    type: object
+  models.PointProfile:
+    properties:
+      email:
+        example: salah@mail.com
+        type: string
+      first_name:
+        example: Salah
+        type: string
+      id:
+        type: integer
+      image:
+        example: salah.jpg
+        type: string
+      last_name:
+        example: Alaudin
+        type: string
+      password:
+        example: Salah1!
+        type: string
+      phone_number:
+        type: integer
+      point:
+        type: integer
+    type: object
+  models.Profile:
+    properties:
+      email:
+        example: salah@mail.com
+        type: string
+      first_name:
+        example: Salah
+        type: string
+      id:
+        type: integer
+      image:
+        example: salah.jpg
+        type: string
+      last_name:
+        example: Alaudin
+        type: string
+      password:
+        example: Salah1!
+        type: string
+      phone_number:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: Profile server
+  version: "1.0"
+paths:
+  /movies:
+    get:
+      consumes:
+      - application/json
+      description: Get All Movie
+      parameters:
+      - description: Search Movie
+        in: query
+        name: search
+        type: string
+      - description: Page Movie
+        in: query
+        name: page
+        type: integer
+      - description: Limit Movie
+        in: query
+        name: limit
+        type: integer
+      - description: Sort Movie
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.Response'
+            - properties:
+                results:
+                  items:
+                    $ref: '#/definitions/models.Movies'
+                  type: array
+              type: object
+      summary: Movies
+      tags:
+      - Movies
+  /movies/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete One Movie
+      parameters:
+      - description: Delete Movie
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.Response'
+            - properties:
+                results:
+                  items:
+                    $ref: '#/definitions/models.Movies'
+                  type: array
+              type: object
+      tags:
+      - Movies
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Updated Movies
+      parameters:
+      - in: formData
+        name: actors
+        type: string
+      - in: formData
+        name: author
+        type: string
+      - in: formData
+        name: duration
+        type: string
+      - example: Action
+        in: formData
+        name: genre
+        type: string
+      - in: formData
+        name: id
+        type: integer
+      - example: Spiderman.jpg
+        in: formData
+        name: image
+        type: string
+      - in: formData
+        name: release_date
+        type: string
+      - example: film action universal
+        in: formData
+        name: synopsis
+        type: string
+      - description: |-
+          Release_date time.Time `json:"release_date" form:"release_date"`
+          Duration     time.Time `json:"duration" form:"duration"`
+        in: formData
+        name: tag
+        type: string
+      - example: Spiderman
+        in: formData
+        name: tittle
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.Response'
+            - properties:
+                results:
+                  $ref: '#/definitions/models.Movie_Data'
+              type: object
+      tags:
+      - Movies
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Add Movies
+      parameters:
+      - in: formData
+        name: actors
+        type: string
+      - in: formData
+        name: author
+        type: string
+      - in: formData
+        name: duration
+        type: string
+      - example: Action
+        in: formData
+        name: genre
+        type: string
+      - in: formData
+        name: id
+        type: integer
+      - example: Spiderman.jpg
+        in: formData
+        name: image
+        type: string
+      - in: formData
+        name: release_date
+        type: string
+      - example: film action universal
+        in: formData
+        name: synopsis
+        type: string
+      - description: |-
+          Release_date time.Time `json:"release_date" form:"release_date"`
+          Duration     time.Time `json:"duration" form:"duration"`
+        in: formData
+        name: tag
+        type: string
+      - example: Spiderman
+        in: formData
+        name: tittle
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.Response'
+            - properties:
+                results:
+                  $ref: '#/definitions/models.Movie_Data'
+              type: object
+      tags:
+      - Movies
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Get Profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.Response'
+            - properties:
+                results:
+                  $ref: '#/definitions/models.PointProfile'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Profile
+      tags:
+      - Profile
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Update Movies
+      parameters:
+      - example: salah@mail.com
+        in: formData
+        name: email
+        type: string
+      - example: Salah
+        in: formData
+        name: first_name
+        type: string
+      - in: formData
+        name: id
+        type: integer
+      - example: salah.jpg
+        in: formData
+        name: image
+        type: string
+      - example: Alaudin
+        in: formData
+        name: last_name
+        type: string
+      - example: Salah1!
+        in: formData
+        name: password
+        type: string
+      - in: formData
+        name: phone_number
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/controllers.Response'
+            - properties:
+                results:
+                  $ref: '#/definitions/models.Profile'
+              type: object
+      tags:
+      - Profile
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
