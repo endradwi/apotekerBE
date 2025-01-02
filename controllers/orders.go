@@ -55,7 +55,7 @@ func OrderMovies(ctx *gin.Context) {
 // @Success 200 {object} Response{results=models.MoviesCinema}
 // @Router /orders/cinema/{id} [post]
 func GetMovieCinema(ctx *gin.Context) {
-	id, _ := strconv.Atoi(ctx.DefaultQuery("id", ""))
+	id, _ := strconv.Atoi(ctx.Param("id"))
 	searchName := ctx.DefaultQuery("searchName", "")
 	searchDate := ctx.DefaultQuery("searchDate", "")
 	searchTime := ctx.DefaultQuery("searchTime", "")

@@ -8,6 +8,6 @@ import (
 
 func OrdersRouter(router *gin.RouterGroup) {
 	// router.GET("", controllers.GetAllMovies)
-	router.GET("/cinema", controllers.GetMovieCinema)
+	router.GET("/cinema/:id", controllers.GetMovieCinema)
 	router.POST("", controllers.OrderMovies)
 }

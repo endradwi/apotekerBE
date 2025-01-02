@@ -123,24 +123,22 @@ func BookingCinema(paramId int, searchName string, searchTime string, searchDate
 	defer conn.Close(context.Background())
 	// var movie ListCinema
 
-	searchingName := fmt.Sprintf("%%%s%%", searchName)
+	// searchingName := fmt.Sprintf("%%%s%%", searchName)
 	searchingTime := fmt.Sprintf("%%%s%%", searchTime)
-	searchingDate := fmt.Sprintf("%%%s%%", searchDate)
-	searchingLocation := fmt.Sprintf("%%%s%%", searchLocation)
+	// searchingDate := fmt.Sprintf("%%%s%%", searchDate)
+	// searchingLocation := fmt.Sprintf("%%%s%%", searchLocation)
 
 	rows, _ := conn.Query(context.Background(), `
 	SELECT movies.id, movies.tittle, movies.genre,
-	movies.images, cinema.cinema_time, cinema.name, 
-	cinema.cinema_date, cinema.cinema_location
+	movies.images, cinema.name, cinema.cinema_date,
+	cinema.cinema_time, cinema.cinema_location
 	FROM cinema 
     JOIN movies ON cinema.movies_id = movies.id
-    WHERE movies.id = $1 AND cinema.name ILIKE $2 
-    AND cinema.cinema_date LIKE $3 AND cinema.cinema_time LIKE $4 
-    AND cinema.cinema_location ILIKE $5
-	`, paramId, searchingName, searchingDate, searchingTime, searchingLocation)
+    WHERE movies.id = $1 AND cinema.cinema_time LIKE $2
+	`, paramId, searchingTime)
 
-	log.Println("data = ", rows)
 	cinema, _ := pgx.CollectRows(rows, pgx.RowToStructByName[MoviesCinema])
+	log.Println("data = ", rows)
 	return cinema
 }
 
