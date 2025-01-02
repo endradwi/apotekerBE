@@ -7,7 +7,7 @@ import (
 )
 
 func OrdersRouter(router *gin.RouterGroup) {
-	router.GET("", controllers.GetAllMovies)
-	router.GET("/:id", controllers.GetDetailMoviesById)
+	// router.GET("", controllers.GetAllMovies)
+	router.GET("/cinema", controllers.GetMovieCinema)
 	router.POST("", controllers.OrderMovies)
 }

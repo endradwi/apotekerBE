@@ -36,7 +36,7 @@ func ValidationToken() gin.HandlerFunc {
 		godotenv.Load()
 		err := tok.Claims([]byte(lib.GetMD5hash(os.Getenv("JWT_SECRET"))), &out)
 
-		ctx.Set("userId", out["userId"].(float64))
+		ctx.Set("userId", int(out["userId"].(float64)))
 
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, controllers.Response{

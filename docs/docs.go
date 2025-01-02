@@ -15,6 +15,82 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Login Account",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Input Email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Input Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Registrasi Account",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Input Email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Input Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/movies": {
             "get": {
                 "description": "Get All Movie",
@@ -68,99 +144,8 @@ const docTemplate = `{
                                         "results": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/models.Movies"
+                                                "$ref": "#/definitions/models.GetAllMovie"
                                             }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/movies/:id": {
-            "get": {
-                "description": "Updated Movies",
-                "consumes": [
-                    "application/x-www-form-urlencoded"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "actors",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "author",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "duration",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "example": "Action",
-                        "name": "genre",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "id",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "example": "Spiderman.jpg",
-                        "name": "image",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "release_date",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "example": "film action universal",
-                        "name": "synopsis",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Release_date time.Time ` + "`" + `json:\"release_date\" form:\"release_date\"` + "`" + `\nDuration     time.Time ` + "`" + `json:\"duration\" form:\"duration\"` + "`" + `",
-                        "name": "tag",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "example": "Spiderman",
-                        "name": "tittle",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/controllers.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "results": {
-                                            "$ref": "#/definitions/models.Movie_Data"
                                         }
                                     }
                                 }
@@ -182,23 +167,316 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
-                        "type": "string",
-                        "name": "actors",
-                        "in": "formData"
+                        "type": "integer",
+                        "description": "Id Movie",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
+                        "description": "Edit tittle",
+                        "name": "tittle",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update genre",
+                        "name": "genre",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Update Image",
+                        "name": "Image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Synopsis",
+                        "name": "synopsis",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Author",
                         "name": "author",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
+                        "description": "Update Actors",
+                        "name": "actors",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Realease Date",
+                        "name": "release_date",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Duration",
                         "name": "duration",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Tag",
+                        "name": "tag",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.MoviesbyTag"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/{id}": {
+            "get": {
+                "description": "Detail Movies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Detail Movie",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.MoviesNoTag"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete Movies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Delete Movie",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.MoviesbyTag"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Edit Movies",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Id Movie",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Edit tittle",
+                        "name": "tittle",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update genre",
+                        "name": "genre",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Update Image",
+                        "name": "Image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Synopsis",
+                        "name": "synopsis",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Author",
+                        "name": "author",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Actors",
+                        "name": "actors",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Realease Date",
+                        "name": "release_date",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Duration",
+                        "name": "duration",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Tag",
+                        "name": "tag",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controllers.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.Movie_body"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "post": {
+                "description": "Add Order tikers",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Tiket"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "cinema_id",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "example": "Action",
+                        "name": "cinema_name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "date",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
                         "name": "genre",
                         "in": "formData"
                     },
@@ -209,31 +487,52 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "example": "Spiderman.jpg",
                         "name": "image",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "name": "release_date",
+                        "name": "location",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "movie_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "payment_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "profile_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "quantity",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "seat_id",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "example": "film action universal",
-                        "name": "synopsis",
+                        "name": "time",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "Release_date time.Time ` + "`" + `json:\"release_date\" form:\"release_date\"` + "`" + `\nDuration     time.Time ` + "`" + `json:\"duration\" form:\"duration\"` + "`" + `",
-                        "name": "tag",
+                        "name": "title",
                         "in": "formData"
                     },
                     {
-                        "type": "string",
-                        "example": "Spiderman",
-                        "name": "tittle",
+                        "type": "integer",
+                        "name": "total_price",
                         "in": "formData"
                     }
                 ],
@@ -249,7 +548,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "results": {
-                                            "$ref": "#/definitions/models.Movie_Data"
+                                            "$ref": "#/definitions/models.OrderBody"
                                         }
                                     }
                                 }
@@ -257,23 +556,53 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Delete One Movie",
+            }
+        },
+        "/orders/cinema/{id}": {
+            "post": {
+                "description": "Add Choose Cinema tikers",
                 "consumes": [
-                    "application/json"
+                    "application/x-www-form-urlencoded"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Movies"
+                    "Order Tiket"
                 ],
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Delete Movie",
+                        "type": "integer",
+                        "description": "Select Movie Tiket",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search Name Cinema",
+                        "name": "searchName",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search Date Cinema",
+                        "name": "searchDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search Time Cinema",
+                        "name": "searchTime",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search Location Cinema",
+                        "name": "searchLocation",
                         "in": "query",
                         "required": true
                     }
@@ -290,10 +619,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "results": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/models.Movies"
-                                            }
+                                            "$ref": "#/definitions/models.MoviesCinema"
                                         }
                                     }
                                 }
@@ -356,43 +682,44 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "example": "salah@mail.com",
-                        "name": "email",
+                        "description": "Update First Name",
+                        "name": "First_Name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Update Last Name",
+                        "name": "Last_Name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Update Image",
+                        "name": "Image",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "example": "Salah",
-                        "name": "first_name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "id",
-                        "in": "formData"
+                        "description": "Update Phone_Number",
+                        "name": "Phone_Number",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
-                        "example": "salah.jpg",
-                        "name": "image",
-                        "in": "formData"
+                        "description": "Update Email",
+                        "name": "Email",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
-                        "example": "Alaudin",
-                        "name": "last_name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "example": "Salah1!",
-                        "name": "password",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "phone_number",
-                        "in": "formData"
+                        "description": "Update Password",
+                        "name": "Password",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -432,7 +759,27 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Movie_Data": {
+        "models.GetAllMovie": {
+            "type": "object",
+            "properties": {
+                "genre": {
+                    "type": "string",
+                    "example": "Action"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "Spiderman.jpg"
+                },
+                "tittle": {
+                    "type": "string",
+                    "example": "Spiderman"
+                }
+            }
+        },
+        "models.Movie_body": {
             "type": "object",
             "properties": {
                 "actors": {
@@ -472,7 +819,72 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Movies": {
+        "models.MoviesCinema": {
+            "type": "object",
+            "properties": {
+                "cinema": {
+                    "type": "string"
+                },
+                "cinema_date": {
+                    "type": "string"
+                },
+                "cinema_location": {
+                    "type": "string"
+                },
+                "cinema_time": {
+                    "type": "string"
+                },
+                "genre": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "tittle": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MoviesNoTag": {
+            "type": "object",
+            "properties": {
+                "actors": {
+                    "type": "string"
+                },
+                "author": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "genre": {
+                    "type": "string",
+                    "example": "Action"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "Spiderman.jpg"
+                },
+                "release_date": {
+                    "type": "string"
+                },
+                "synopsis": {
+                    "type": "string",
+                    "example": "film action universal"
+                },
+                "tittle": {
+                    "type": "string",
+                    "example": "Spiderman"
+                }
+            }
+        },
+        "models.MoviesbyTag": {
             "type": "object",
             "properties": {
                 "actors": {
@@ -506,6 +918,56 @@ const docTemplate = `{
                 }
             }
         },
+        "models.OrderBody": {
+            "type": "object",
+            "properties": {
+                "cinema_id": {
+                    "type": "integer"
+                },
+                "cinema_name": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "genre": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "movie_id": {
+                    "type": "integer"
+                },
+                "payment_id": {
+                    "type": "integer"
+                },
+                "profile_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "seat_id": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "total_price": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.PointProfile": {
             "type": "object",
             "properties": {
@@ -533,7 +995,7 @@ const docTemplate = `{
                     "example": "Salah1!"
                 },
                 "phone_number": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "point": {
                     "type": "integer"
@@ -567,7 +1029,7 @@ const docTemplate = `{
                     "example": "Salah1!"
                 },
                 "phone_number": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         }

@@ -9,7 +9,7 @@ import (
 
 func ProfileRouter(router *gin.RouterGroup) {
 	router.Use(middlewares.ValidationToken())
-	router.PATCH("/:id", controllers.EditProfile)
+	router.PATCH("", controllers.EditProfile)
 	// router.PATCH("/:id", controllers.EditUser)
 	// router.GET("", controllers.GetAllProfile)
 	router.GET("", controllers.GetProfile)

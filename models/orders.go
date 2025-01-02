@@ -2,9 +2,12 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"test/lib"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type order struct {
@@ -53,6 +56,39 @@ type Payment struct {
 	Limit_Payment time.Time `json:"limit_payment" form:"limit_paymnet"`
 }
 
+type MoviesCinema struct {
+	Id              int    `json:"id"`
+	Tittle          string `json:"tittle" form:"tittle"`
+	Genre           string `json:"genre" form:"genre"`
+	Images          string `json:"image" form:"image"`
+	Cinema          string `json:"cinema" form:"cinema"`
+	Cinema_date     string `json:"cinema_date" form:"cinema_date"`
+	Cinema_time     string `json:"cinema_time" form:"cinema_time"`
+	Cinema_location string `json:"cinema_location" form:"cinema_location"`
+}
+
+type seat string
+
+type SeatCinema struct {
+	Id              int    `json:"id"`
+	Tittle          string `json:"tittle" form:"tittle"`
+	Genre           string `json:"genre" form:"genre"`
+	Images          string `json:"image" form:"image"`
+	Cinema          string `json:"cinema" form:"cinema"`
+	Cinema_date     string `json:"cinema_date" form:"cinema_date"`
+	Cinema_time     string `json:"cinema_time" form:"cinema_time"`
+	Cinema_location string `json:"cinema_location" form:"cinema_location"`
+	Price           int    `json:"price" from:"price"`
+	Seats           []seat `json:"seat" from:"seat[]"`
+}
+
+type TotalSeatCinema struct {
+	SeatCinema
+	Total_Seat int
+}
+
+type ListCinema []MoviesCinema
+
 type ListOrders []Orders
 
 func OrderTicket(data OrderBody) OrderData {
@@ -79,49 +115,39 @@ func OrderTicket(data OrderBody) OrderData {
 		&order.TotalPrice, &order.Payment_id,
 	)
 
-	// var payment Payment
-	//
-	// conn.QueryRow(context.Background(), `
-	// SELECT COUNT(seat_id) FROM orders WHERE id = $1
-	// `, data.Seat_id).Scan(&order.Seat_id)
-	//
-	// totalPayment := totalPrice *
-
-	// orders := struct {
-	// 	seat int `db:"seat_id"`
-	// }{}
-
-	// conn.QueryRow(context.Background(), `
-	// SELECT SUM(user_id) From orders WHERE id = $1
-	// `, data.Seat_id).Scan(&orders.seat)
-
-	// log.Println("data orders seat=", orders.seat)
-	// totalPrice = totalPrice * orders.seat
-
-	// conn.QueryRow(context.Background(), `
-	// SELECT  movies.tittle, movies.images, movies.genre, cinema.name,
-	// cinema_location.name_location
-	// FROM orders
-	// JOIN movies ON movies.id = orders.movie_id
-	// JOIN cinema ON cinema.id = orders.cinema_id
-	// JOIN cinema_location ON cinema_location.cinema_id = cinema.id
-	// WHERE orders.id = $1
-	// `,
-	// 	order.Id).Scan(
-	// 	&order.Tittle, &order.Image, &order.Genre,
-	// 	&order.Cinema_name, &order.Location,
-	// )
-
 	return order
 }
 
-func PaymentTiket(payment Payment) Payment {
+func BookingCinema(paramId int, searchName string, searchTime string, searchDate string, searchLocation string) ListCinema {
+	conn := lib.DB()
+	defer conn.Close(context.Background())
+	// var movie ListCinema
+
+	searchingName := fmt.Sprintf("%%%s%%", searchName)
+	searchingTime := fmt.Sprintf("%%%s%%", searchTime)
+	searchingDate := fmt.Sprintf("%%%s%%", searchDate)
+	searchingLocation := fmt.Sprintf("%%%s%%", searchLocation)
+
+	rows, _ := conn.Query(context.Background(), `
+	SELECT movies.id, movies.tittle, movies.genre,
+	movies.images, cinema.cinema_time, cinema.name, 
+	cinema.cinema_date, cinema.cinema_location
+	FROM cinema 
+    JOIN movies ON cinema.movies_id = movies.id
+    WHERE movies.id = $1 AND cinema.name ILIKE $2 
+    AND cinema.cinema_date LIKE $3 AND cinema.cinema_time LIKE $4 
+    AND cinema.cinema_location ILIKE $5
+	`, paramId, searchingName, searchingDate, searchingTime, searchingLocation)
+
+	log.Println("data = ", rows)
+	cinema, _ := pgx.CollectRows(rows, pgx.RowToStructByName[MoviesCinema])
+	return cinema
+}
+
+func SeatOrder() {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
-	var order Payment
 	conn.QueryRow(context.Background(), `
-	SELECT COUNT(seat_id) from orders WHERE id = $1
 	`)
-	return order
 }

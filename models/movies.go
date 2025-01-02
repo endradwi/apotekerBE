@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type Movies struct {
+type MoviesbyTag struct {
 	Id       int    `json:"id"`
 	Tittle   string `json:"tittle" form:"tittle" example:"Spiderman"`
 	Genre    string `json:"genre" form:"genre" example:"Action"`
@@ -22,39 +22,42 @@ type Movies struct {
 	// Duration     time.Time `json:"duration" form:"duration"`
 	Tag string `json:"tag" form:"tag"`
 }
+type MoviesNoTag struct {
+	Id           int       `json:"id"`
+	Tittle       string    `json:"tittle" form:"tittle" example:"Spiderman"`
+	Genre        string    `json:"genre" form:"genre" example:"Action"`
+	Image        string    `json:"image" form:"image" example:"Spiderman.jpg"`
+	Synopsis     string    `json:"synopsis" form:"synopsis" example:"film action universal"`
+	Author       string    `json:"author" form:"author"`
+	Actors       string    `json:"actors" form:"actors"`
+	Release_date time.Time `json:"release_date" form:"release_date"`
+	Duration     time.Time `json:"duration" form:"duration"`
+	// Tag          string    `json:"tag" form:"tag"`
+}
+
+type GetAllMovie struct {
+	Id     int    `json:"id"`
+	Tittle string `json:"tittle" form:"tittle" example:"Spiderman"`
+	Genre  string `json:"genre" form:"genre" example:"Action"`
+	Image  string `json:"image" form:"image" example:"Spiderman.jpg"`
+}
 
 type Movie_body struct {
-	Movies
+	MoviesbyTag
 	Release_date string `json:"release_date" form:"release_date"`
 	Duration     string `json:"duration" form:"duration" `
 }
 
 type Movie_Data struct {
-	Movies
+	MoviesbyTag
 	Release_date time.Time `db:"release_date"`
 	Duration     time.Time `db:"duration"`
 }
-type MoviesAll struct {
-	Id              int       `json:"id"`
-	Tittle          string    `json:"tittle" form:"tittle"`
-	Genre           string    `json:"genre" form:"genre"`
-	Images          string    `json:"image" form:"image"`
-	Synopsis        string    `json:"synopsis" form:"synopsis"`
-	Author          string    `json:"author" form:"author"`
-	Actors          string    `json:"actors" form:"actors"`
-	Release_date    time.Time `json:"release_date" form:"release_date"`
-	Duration        time.Time `json:"duration" form:"duration"`
-	Price           int       `json:"price" form:"price"`
-	Cinema          string    `json:"cinema" form:"cinema"`
-	Cinema_date     time.Time `json:"cinema_date" form:"cinema_date"`
-	Cinema_time     time.Time `json:"cinema_time" form:"cinema_time"`
-	Cinema_location string    `json:"cinema_location" form:"cinema_location"`
-}
 
-type ListMovie []Movies
-type ListMovieAll []MoviesAll
+type ListMovie []MoviesbyTag
+type ListAllMovie []GetAllMovie
 
-func FindAllMovie(page int, limit int, search string, sort string) ListMovie {
+func FindAllMovie(page int, limit int, search string, sort string) ListAllMovie {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 	offset := (page - 1) * limit
@@ -62,18 +65,16 @@ func FindAllMovie(page int, limit int, search string, sort string) ListMovie {
 	searching := fmt.Sprintf("%%%s%%", search)
 
 	query := fmt.Sprintf(`
-	SELECT id, tittle, genre,images, synopsis,
-	author, actors, release_date,
-	duration, tag
+	SELECT id, tittle, genre,images
 	FROM movies
 	WHERE tittle ILIKE $1
  	ORDER BY id %s
  	LIMIT $2 OFFSET $3
  `, sort)
 	rows, _ := conn.Query(context.Background(), query, searching, limit, offset)
-	log.Println("data = ", rows)
-	movie, _ := pgx.CollectRows(rows, pgx.RowToStructByName[Movies])
-	log.Println("data = ", movie)
+
+	movie, _ := pgx.CollectRows(rows, pgx.RowToStructByName[GetAllMovie])
+
 	return movie
 }
 func CountData(search string) int {
@@ -91,43 +92,19 @@ func CountData(search string) int {
 	return count
 }
 
-func FindOneMovie(paramId int) Movie_Data {
+func FindOneMovie(paramId int) MoviesNoTag {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	var movie Movie_Data
+	var movie MoviesNoTag
 
 	conn.QueryRow(context.Background(), `
 	SELECT id, tittle, genre, synopsis, 
-	author, actors, release_date, duration, tag
+	author, actors, release_date, duration
 	FROM movies 
     WHERE id = $1
 	`, paramId).Scan(&movie.Id, &movie.Tittle, &movie.Genre,
 		&movie.Synopsis, &movie.Author, &movie.Actors,
-		&movie.Release_date, &movie.Duration, &movie.Tag)
-	return movie
-}
-
-func FindDetailMovie(paramId int) MoviesAll {
-	conn := lib.DB()
-	defer conn.Close(context.Background())
-	var movie MoviesAll
-
-	conn.QueryRow(context.Background(), `
-	SELECT movies.id, movies.tittle, movies.genre,
-	movies.synopsis, movies.author, movies.actors,
-	movies.release_date, movies.duration, cinema.name, 
-	cinema_date.name_date, cinema_time.name_time,
-	cinema_location.name_location
-	FROM movies 
-    JOIN cinema ON cinema.movies_id = movies.id
-    JOIN cinema_date ON cinema_date.cinema_id = cinema.id
-    JOIN cinema_time ON cinema_time.cinema_id = cinema.id
-    JOIN cinema_location ON cinema_location.cinema_id = cinema.id
-    WHERE movies.id = $1
-	`, paramId).Scan(&movie.Id, &movie.Tittle, &movie.Genre,
-		&movie.Synopsis, &movie.Author, &movie.Actors,
-		&movie.Release_date, &movie.Duration, &movie.Cinema,
-		&movie.Cinema_date, &movie.Cinema_time, &movie.Cinema_location)
+		&movie.Release_date, &movie.Duration)
 	return movie
 }
 
@@ -234,11 +211,11 @@ func UpdateMovie(movie Movie_body) Movie_Data {
 	return movieUpdate
 }
 
-func DeleteMovie(iddb int) Movies {
+func DeleteMovie(iddb int) MoviesbyTag {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
-	var movieDelete Movies
+	var movieDelete MoviesbyTag
 
 	conn.QueryRow(context.Background(), `
 	DELETE FROM movie WHERE id = $1

@@ -13,7 +13,7 @@ func MovieRouter(router *gin.RouterGroup) {
 	docs.SwaggerInfo.BasePath = ""
 	// router.GET("", ginSwagger.WrapHandler(swaggerfile.Handler))
 	router.GET("", controllers.GetAllMovies)
-	router.GET("/:id", controllers.GetDetailMoviesById)
+	router.GET("/:id", controllers.GetMoviesById)
 	router.POST("", controllers.SaveMovies)
 	router.PATCH("/:id", controllers.EditMovie)
 	router.DELETE("/:id", controllers.DeleteMovie)

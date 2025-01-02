@@ -14,7 +14,7 @@ type Profile struct {
 	First_Name   string `json:"first_name" form:"first_name" example:"Salah"`
 	Last_Name    string `json:"last_name" form:"last_name" example:"Alaudin"`
 	Image        string `jsoon:"image" form:"image" example:"salah.jpg"`
-	Phone_number int    `json:"phone_number" form:"phone_number"`
+	Phone_number string `json:"phone_number" form:"phone_number"`
 	Email        string `json:"email" form:"email" example:"salah@mail.com"`
 	Password     string `json:"password" form:"password" example:"Salah1!"`
 }
@@ -102,74 +102,14 @@ func AddProfile(profile RelationProfile) RelationProfile {
 	return new
 }
 
-// func UpdateUser(profile Profile) Profile {
-// 	conn := lib.DB()
-// 	defer conn.Close(context.Background())
-
-// 	var updatedProfile Profile
-
-// 	if profile.Email != "" || profile.Password != "" {
-// 		conn.QueryRow(context.Background(), `
-// 			UPDATE users
-// 			SET email = $1,
-// 			    password = $2
-// 			WHERE email = $3
-// 		`, profile.Email, profile.Password, profile.Email)
-// 	}
-// 	log.Println("id =", profile.Id)
-// 	log.Println("first_name =", profile.First_Name)
-// 	log.Println("last_name =", profile.Last_Name)
-// 	log.Println("image =", profile.Image)
-// 	log.Println("email =", profile.Email)
-// 	log.Println("password =", profile.Password)
-// 	var user_Id int
-// 	conn.QueryRow(context.Background(), `
-// 		SELECT id FROM users WHERE email = $1
-// 	`, profile.Email).Scan(&user_Id)
-
-// 	row := conn.QueryRow(context.Background(), `
-// 		SELECT COUNT(*) FROM users
-// 		WHERE users.id = $1
-// 	`, user_Id)
-
-// 	var count int
-// 	row.Scan(&count)
-
-// 	if count == 0 {
-// 		conn.QueryRow(context.Background(), `
-// 			INSERT INTO profile (first_name, last_name, image, user_id)
-// 			VALUES ($1, $2, $3, $4)
-// 		`, profile.First_Name, profile.Last_Name, profile.Image, user_Id)
-
-// 	}
-
-// 	if profile.First_Name != "" || profile.Last_Name != "" || profile.Image != "" {
-// 		conn.QueryRow(context.Background(), `
-// 			UPDATE profile
-// 			SET first_name = $1,
-// 			    last_name = $2,
-// 			    image = $3
-// 			FROM users
-// 			WHERE profile.user_id = $4
-// 			AND users.id = $4
-// 			RETURNING profile.id, profile.first_name, profile.last_name, profile.image, users.email, users.password
-// 		`, profile.First_Name, profile.Last_Name, profile.Image, user_Id).Scan(
-// 			&updatedProfile.Id,
-// 			&updatedProfile.First_Name,
-// 			&updatedProfile.Last_Name,
-// 			&updatedProfile.Image,
-// 			&updatedProfile.Email,
-// 			&updatedProfile.Password,
-// 		)
-// 	}
-
-//		return updatedProfile
-//	}
-func UpdatedProfile(profile Profile) Profile {
+func UpdatedProfile(profile Profile, userId int) Profile {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
 	var update Profile
+
+	log.Println("data updated = ", profile)
+
 	row := conn.QueryRow(context.Background(), `
 		UPDATE profile
 		SET first_name=$1,
@@ -178,31 +118,36 @@ func UpdatedProfile(profile Profile) Profile {
 		FROM users
 		WHERE users.id = $4
 		AND profile.user_id = users.id
-		RETURNING profile.id, profile.first_name, profile.last_name, profile.image
-	`, profile.First_Name, profile.Last_Name, profile.Image, profile.Id)
+		RETURNING users.id, profile.first_name, profile.last_name, profile.image
+	`, profile.First_Name, profile.Last_Name, profile.Image, userId)
 
 	if err := row.Scan(&update.Id, &update.First_Name, &update.Last_Name, &update.Image); err != nil {
 		fmt.Println("Error updating profile:", err)
 	}
 
-	row = conn.QueryRow(context.Background(), `
-		UPDATE users
-		SET email=$1, password=$2
-		FROM profile
-		WHERE users.id=$3
-		AND users.id = profile.user_id
-		RETURNING users.email, users.password
-	`, profile.Email, profile.Password, profile.Id)
-	if err := row.Scan(&update.Email, &update.Password); err != nil {
-		fmt.Println("Error updating user:", err)
-	}
+	log.Println("updated =", update)
+	log.Println("updated =", profile)
 	log.Println("password updated =", update.Password)
 	log.Println("old updated =", profile.Password)
 
-	hash := lib.CreateHash(update.Password)
-	update.Password = hash
+	row = conn.QueryRow(context.Background(), `
+		UPDATE users
+		SET email=$1, password=$2
+		WHERE id=$3
+		RETURNING users.email, users.password
+	`, profile.Email, profile.Password, userId)
+	if err := row.Scan(&update.Email, &update.Password); err != nil {
+		fmt.Println("Error updating user:", err)
+	}
 
-	// fmt.Printf("Updated Profile: %+v\n", update)
+	// log.Println("password updated =", update.Password)
+	// log.Println("old updated =", profile.Password)
+
+	// hash := lib.CreateHash(update.Password)
+	// update.Password = hash
+
+	// log.Println("data hash =", hash)
+
 	return update
 }
 
