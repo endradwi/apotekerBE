@@ -179,6 +179,8 @@ INSERT INTO orders(profile_id, movie_id, cinema_id, total_price, qty) VALUES (15
 SELECT price FROM cinema WHERE id = $1;
 drop Table cinema;
 
+SELECT * from movies;
+
 CREATE TABLE cinema_date(
     id SERIAL PRIMARY KEY,
     name_date DATE,

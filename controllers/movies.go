@@ -70,6 +70,7 @@ func GetAllMovies(ctx *gin.Context) {
 	// count = models.CountData(search)
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))
 	log.Println("errorrrr", totalPage)
+	log.Println("errorrrr", count)
 	nextPage := page + 1
 	if nextPage > totalPage {
 		nextPage = totalPage
