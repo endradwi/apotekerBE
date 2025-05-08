@@ -15,7 +15,7 @@ import (
 
 func ValidationToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// ctx.Header("Content-Type")
+
 		head := ctx.GetHeader("Authorization")
 
 		if head == "" {
@@ -29,8 +29,7 @@ func ValidationToken() gin.HandlerFunc {
 		token := strings.Split(head, " ")[1:][0]
 
 		tok, _ := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
-		// log.Println("data =", tok)
-		// out := jwt.Claims{}
+
 		out := make(map[string]interface{})
 
 		godotenv.Load()
@@ -46,13 +45,7 @@ func ValidationToken() gin.HandlerFunc {
 
 			ctx.Abort()
 		}
-		// if head != "true" {
-		// 	ctx.JSON(http.StatusUnauthorized, controllers.Response{
-		// 		Success: false,
-		// 		Message: "Unauthorized",
-		// 	})
-		// 	ctx.Abort()
-		// }
+
 		ctx.Next()
 	}
 }

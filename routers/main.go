@@ -7,12 +7,12 @@ import (
 
 func Routers(router *gin.Engine) {
 	router.Use(cors.New(cors.Config{
-		// AllowAllOrigins: true,
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "PUT"},
 		AllowHeaders:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE"},
 		AllowCredentials: true,
 	}))
+
 	AuthRouters(router.Group("/auth"))
 	DoctorRouter(router.Group("/doctor"))
 	UserRouter(router.Group("/users"))
