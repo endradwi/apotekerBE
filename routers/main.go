@@ -7,9 +7,16 @@ import (
 
 func Routers(router *gin.Engine) {
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "PUT"},
-		AllowHeaders:     []string{"*"},
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowMethods: []string{"GET", "POST", "PATCH", "DELETE", "PUT"},
+		AllowHeaders: []string{
+			"Origin",
+			"Content-Type",
+			"Accept",
+			"Authorization",
+			"X-Requested-With",
+			"User_ID", // <- tambahkan custom header ini
+		},
 		AllowCredentials: true,
 	}))
 
