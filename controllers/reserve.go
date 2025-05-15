@@ -19,6 +19,10 @@ func CreateData(ctx *gin.Context) {
 	}
 	var form models.ReserveData
 	err := ctx.ShouldBind(&form)
+	fmt.Println("Content-Type:", ctx.ContentType())
+	fmt.Println("form data", form)
+	fmt.Println("date:", err)
+	fmt.Println("date=", form.Date)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, Response{
 			Success: false,
@@ -31,11 +35,12 @@ func CreateData(ctx *gin.Context) {
 		Fullname:     form.Fullname,
 		Phone_number: form.Phone_number,
 		Age:          form.Age,
+		Date:         form.Date,
+		Doctor:       form.Doctor,
 		Complaint:    form.Complaint,
 		User_id:      form.User_id,
-		Doctor_id:    form.Doctor_id,
 	}
-
+	fmt.Println("data date=", data.Date)
 	reserve, err := models.AddReserve(data)
 	if err != nil {
 		fmt.Println(err)
