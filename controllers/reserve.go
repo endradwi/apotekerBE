@@ -17,7 +17,7 @@ func CreateData(ctx *gin.Context) {
 		})
 		return
 	}
-	var form models.ReserveData
+	var form models.StatusRegister
 	err := ctx.ShouldBind(&form)
 	fmt.Println("Content-Type:", ctx.ContentType())
 	fmt.Println("form data", form)
@@ -31,14 +31,17 @@ func CreateData(ctx *gin.Context) {
 		return
 	}
 	form.User_id = val.(int)
-	data := models.ReserveData{
-		Fullname:     form.Fullname,
-		Phone_number: form.Phone_number,
-		Age:          form.Age,
-		Date:         form.Date,
-		Doctor:       form.Doctor,
-		Complaint:    form.Complaint,
-		User_id:      form.User_id,
+	data := models.StatusRegister{
+		ReserveData: models.ReserveData{
+			Fullname:     form.Fullname,
+			Phone_number: form.Phone_number,
+			Age:          form.Age,
+			Date:         form.Date,
+			Doctor:       form.Doctor,
+			Complaint:    form.Complaint,
+			User_id:      form.User_id,
+		},
+		Status: "Pending",
 	}
 	fmt.Println("data date=", data.Date)
 	reserve, err := models.AddReserve(data)

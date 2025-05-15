@@ -40,7 +40,8 @@ CREATE TABLE reserve (
     date DATE,
     doctor VARCHAR(60),
     complaint VARCHAR(255),
-    user_id INT REFERENCES users (id)
+    user_id INT REFERENCES users (id),
+    status VARCHAR(20)
 );
 
 SELECT * FROM users;
@@ -51,6 +52,6 @@ select * from role;
 
 SELECT * FROM doctor;
 
-DROP Table doctor, reserve;
+DROP Table reserve;
 
 select * from reserve;

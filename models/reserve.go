@@ -18,22 +18,27 @@ type ReserveData struct {
 	User_id      int       `json:"user_id" form:"user_id"`
 }
 
-func AddReserve(reserve ReserveData) (ReserveData, error) {
+type StatusRegister struct {
+	ReserveData
+	Status string `json:"status" from:"status"`
+}
+
+func AddReserve(reserve StatusRegister) (StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 	fmt.Println("data baru=", reserve)
 	fmt.Println("date", reserve.Date)
-	var reserveAdd ReserveData
+	var reserveAdd StatusRegister
 	// var tempDate time.Time
 	err := conn.QueryRow(context.Background(), `
-	INSERT INTO reserve (fullname, phone_number, age, date,doctor, complaint, user_id ) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, fullname, phone_number, age, date, doctor, complaint, user_id
-	`, reserve.Fullname, reserve.Phone_number, reserve.Age, reserve.Date, reserve.Doctor, reserve.Complaint, reserve.User_id).Scan(&reserveAdd.Id, &reserveAdd.Fullname, &reserveAdd.Phone_number, &reserveAdd.Age, &reserveAdd.Date, &reserveAdd.Doctor, &reserveAdd.Complaint, &reserveAdd.User_id)
+	INSERT INTO reserve (fullname, phone_number, age, date,doctor, complaint, user_id, status ) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, fullname, phone_number, age, date, doctor, complaint, user_id, status
+	`, reserve.Fullname, reserve.Phone_number, reserve.Age, reserve.Date, reserve.Doctor, reserve.Complaint, reserve.User_id, reserve.Status).Scan(&reserveAdd.Id, &reserveAdd.Fullname, &reserveAdd.Phone_number, &reserveAdd.Age, &reserveAdd.Date, &reserveAdd.Doctor, &reserveAdd.Complaint, &reserveAdd.User_id, &reserveAdd.Status)
 
 	// reserveAdd.Date = CustomDate(tempDate)
 	fmt.Println("Reserve Add = ", reserveAdd)
 	if err != nil {
-		return ReserveData{}, err
+		return StatusRegister{}, err
 	}
 
 	return reserveAdd, nil
