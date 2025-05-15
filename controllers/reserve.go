@@ -51,3 +51,20 @@ func CreateData(ctx *gin.Context) {
 		Results: reserve,
 	})
 }
+
+func GetAllReserveAdmin(ctx *gin.Context) {
+	users, err := models.GetAllReserve()
+	if err != nil {
+		fmt.Println("Error Get All User", err)
+		ctx.JSON(http.StatusInternalServerError, Response{
+			Success: false,
+			Message: "Failed to get users"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, Response{
+		Success: true,
+		Message: "Get All Reserve User",
+		Results: users,
+	})
+}

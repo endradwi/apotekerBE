@@ -18,34 +18,6 @@ type ReserveData struct {
 	User_id      int       `json:"user_id" form:"user_id"`
 }
 
-// type CustomDate time.Time
-
-// func (cd *CustomDate) UnmarshalJSON(b []byte) error {
-// 	s := strings.Trim(string(b), `"`)
-// 	t, err := time.Parse("02/01/2006", s)
-// 	if err != nil {
-// 		fmt.Println("error parse date", err)
-// 		return err
-// 	}
-// 	*cd = CustomDate(t)
-// 	return nil
-// }
-
-// func (cd *CustomDate) UnmarshalText(text []byte) error {
-// 	s := string(text)
-// 	t, err := time.Parse("02/01/2006", s)
-// 	if err != nil {
-// 		fmt.Println("error parse date from form-data", err)
-// 		return err
-// 	}
-// 	*cd = CustomDate(t)
-// 	return nil
-// }
-
-// func (cd CustomDate) ToTime() time.Time {
-// 	return time.Time(cd)
-// }
-
 func AddReserve(reserve ReserveData) (ReserveData, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
@@ -65,5 +37,29 @@ func AddReserve(reserve ReserveData) (ReserveData, error) {
 	}
 
 	return reserveAdd, nil
+
+}
+
+func GetAllReserve() ([]ReserveData, error) {
+	conn := lib.DB()
+	defer conn.Close(context.Background())
+	var getAll []ReserveData
+	rows, err := conn.Query(context.Background(), `
+	SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id 
+	FROM reserve
+	`)
+	if err != nil {
+		fmt.Println("Error Find All Users", err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		var data ReserveData
+		if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id); err != nil {
+			return nil, err
+		}
+		getAll = append(getAll, data)
+	}
+	return getAll, err
 
 }
