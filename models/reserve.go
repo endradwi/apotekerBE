@@ -45,12 +45,12 @@ func AddReserve(reserve StatusRegister) (StatusRegister, error) {
 
 }
 
-func GetAllReserve() ([]ReserveData, error) {
+func GetAllReserve() ([]StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	var getAll []ReserveData
+	var getAll []StatusRegister
 	rows, err := conn.Query(context.Background(), `
-	SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id 
+	SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id, status
 	FROM reserve
 	`)
 	if err != nil {
@@ -59,8 +59,8 @@ func GetAllReserve() ([]ReserveData, error) {
 	}
 
 	for rows.Next() {
-		var data ReserveData
-		if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id); err != nil {
+		var data StatusRegister
+		if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id, &data.Status); err != nil {
 			return nil, err
 		}
 		getAll = append(getAll, data)
@@ -69,12 +69,12 @@ func GetAllReserve() ([]ReserveData, error) {
 
 }
 
-func GetAllReserveByUser(userId int) ([]ReserveData, error) {
+func GetAllReserveByUser(userId int) ([]StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	var getAll []ReserveData
+	var getAll []StatusRegister
 	rows, err := conn.Query(context.Background(), `
-	SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id 
+	SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id , status
 	FROM reserve
 	WHERE user_id = $1
 	`, userId)
@@ -84,8 +84,8 @@ func GetAllReserveByUser(userId int) ([]ReserveData, error) {
 	}
 
 	for rows.Next() {
-		var data ReserveData
-		if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id); err != nil {
+		var data StatusRegister
+		if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id, &data.Status); err != nil {
 			return nil, err
 		}
 		getAll = append(getAll, data)
