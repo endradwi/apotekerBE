@@ -63,3 +63,29 @@ func GetAllReserve() ([]ReserveData, error) {
 	return getAll, err
 
 }
+
+func GetAllReserveByUser(userId int) ([]ReserveData, error) {
+	conn := lib.DB()
+	defer conn.Close(context.Background())
+	var getAll []ReserveData
+	rows, err := conn.Query(context.Background(), `
+	SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id 
+	FROM reserve
+	WHERE user_id = $1
+	`, userId)
+	if err != nil {
+		fmt.Println("Error Find All Users", err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		var data ReserveData
+		if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id); err != nil {
+			return nil, err
+		}
+		getAll = append(getAll, data)
+
+	}
+	return getAll, err
+
+}

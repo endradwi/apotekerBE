@@ -10,7 +10,7 @@ import (
 func ReserveRouter(router *gin.RouterGroup) {
 	router.POST("", middlewares.ValidationToken(), controllers.CreateData)
 	router.GET("/all/reserve/admin", controllers.GetAllReserveAdmin)
-	// router.GET("/:id", middlewares.ValidationToken(), controllers.GetOneReserve)
+	router.GET("/all/reserve/users", middlewares.ValidationToken(), controllers.GetAllReserve)
 	// router.PATCH("/:id", middlewares.ValidationToken(), controllers.EditReserve)
 	// router.DELETE("/:id", middlewares.ValidationToken(), controllers.DeleteReserve)
 }

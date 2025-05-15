@@ -68,3 +68,28 @@ func GetAllReserveAdmin(ctx *gin.Context) {
 		Results: users,
 	})
 }
+
+func GetAllReserve(ctx *gin.Context) {
+	val, isAvail := ctx.Get("userId")
+	if !isAvail {
+		ctx.JSON(http.StatusNotFound, Response{
+			Success: false,
+			Message: "Unauthorized id",
+		})
+		return
+	}
+	users, err := models.GetAllReserveByUser(val.(int))
+	if err != nil {
+		fmt.Println("Error Get All User", err)
+		ctx.JSON(http.StatusInternalServerError, Response{
+			Success: false,
+			Message: "Failed to get users"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, Response{
+		Success: true,
+		Message: "Get All Reserve User By ID",
+		Results: users,
+	})
+}
