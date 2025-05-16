@@ -134,6 +134,73 @@ func UpdateDataUser(user Profile, userId int) error {
 	return err
 }
 
+type Status struct {
+	Id           int     `form:"id"` // ID tetap wajib, bukan pointer
+	Full_Name    *string `form:"full_name"`
+	Phone_number *string `form:"phone_number"`
+	Role_Id      *int    `form:"role_id"`
+	Image        *string `form:"image"`
+	Email        *string `form:"email"`
+	Password     *string `form:"password"`
+}
+
+func UpdateDataStatus(user Status) error {
+	conn := lib.DB()
+	defer conn.Close(context.Background())
+
+	query := `UPDATE users SET `
+	params := []interface{}{}
+	paramIndex := 1
+
+	if user.Full_Name != nil {
+		query += fmt.Sprintf("fullname = $%d,", paramIndex)
+		params = append(params, *user.Full_Name)
+		paramIndex++
+	}
+
+	if user.Phone_number != nil {
+		query += fmt.Sprintf("phone_number = $%d,", paramIndex)
+		params = append(params, *user.Phone_number)
+		paramIndex++
+	}
+
+	if user.Role_Id != nil {
+		query += fmt.Sprintf("role_id = $%d,", paramIndex)
+		params = append(params, *user.Role_Id)
+		paramIndex++
+	}
+
+	if user.Image != nil {
+		query += fmt.Sprintf("image = $%d,", paramIndex)
+		params = append(params, *user.Image)
+		paramIndex++
+	}
+
+	if user.Email != nil {
+		query += fmt.Sprintf("email = $%d,", paramIndex)
+		params = append(params, *user.Email)
+		paramIndex++
+	}
+
+	if user.Password != nil {
+		query += fmt.Sprintf("password = $%d,", paramIndex)
+		params = append(params, *user.Password)
+		paramIndex++
+	}
+
+	// hapus koma terakhir
+	query = strings.TrimSuffix(query, ",")
+
+	query += fmt.Sprintf(" WHERE id = $%d", paramIndex)
+	params = append(params, user.Id)
+	fmt.Println("userId", user.Id)
+	fmt.Println("Final query:", query)
+	fmt.Println("Params:", params)
+
+	_, err := conn.Exec(context.Background(), query, params...)
+	return err
+}
+
 func CreateUser(user Profile) (Profile, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())

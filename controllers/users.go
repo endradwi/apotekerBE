@@ -135,6 +135,47 @@ func EditProfile(ctx *gin.Context) {
 		Message: "Update User Success",
 	})
 }
+func EditStatusUser(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, Response{
+			Success: false,
+			Message: "Invalid ID",
+		})
+		return
+	}
+	fmt.Println("ID param =", id)
+	var profile models.Status
+	profile.Id = id
+	err = ctx.ShouldBind(&profile)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, Response{
+			Success: false,
+			Message: "Invalid input",
+		})
+		return
+	}
+
+	fmt.Println("Data profile =", &profile)
+
+	// Panggil update function (harus mendukung partial update)
+	data := models.UpdateDataStatus(profile)
+	fmt.Println("error=", err)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, Response{
+			Success: false,
+			Message: "Failed to update user",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, Response{
+		Success: true,
+		Message: "Update User Success",
+		Results: data,
+	})
+}
 
 func AddAdmin(ctx *gin.Context) {
 	var formData models.Profile

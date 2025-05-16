@@ -10,6 +10,7 @@ import (
 func UserRouter(router *gin.RouterGroup) {
 	// router.Use(middlewares.ValidationToken())
 	router.PATCH("", middlewares.ValidationToken(), controllers.EditProfile)
+	router.PATCH("/:id", controllers.EditStatusUser)
 	router.POST("admin", middlewares.ValidationToken(), controllers.AddAdmin)
 	router.DELETE("/:id", controllers.DeleteUser)
 	// router.PATCH("/:id", controllers.EditUser)
