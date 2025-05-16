@@ -193,9 +193,6 @@ func UpdateDataStatus(user Status) error {
 
 	query += fmt.Sprintf(" WHERE id = $%d", paramIndex)
 	params = append(params, user.Id)
-	fmt.Println("userId", user.Id)
-	fmt.Println("Final query:", query)
-	fmt.Println("Params:", params)
 
 	_, err := conn.Exec(context.Background(), query, params...)
 	return err

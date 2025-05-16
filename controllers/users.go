@@ -69,12 +69,8 @@ func EditProfile(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Data profile =", profile)
-
-	// Default kosong, hanya akan diisi jika ada file dikirim
 	var storedFile string
 
-	// Coba ambil file
 	file, err := ctx.FormFile("image")
 	if err == nil && file != nil && file.Filename != "" {
 		filename := uuid.New().String()
@@ -114,13 +110,11 @@ func EditProfile(ctx *gin.Context) {
 		profile.Image = storedFile
 	}
 
-	// Hash password jika ada
 	if profile.Password != "" {
 		hash := lib.CreateHash(profile.Password)
 		profile.Password = hash
 	}
 
-	// Panggil update function (harus mendukung partial update)
 	err = models.UpdateDataUser(profile, val.(int))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, Response{
@@ -157,9 +151,6 @@ func EditStatusUser(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Data profile =", &profile)
-
-	// Panggil update function (harus mendukung partial update)
 	data := models.UpdateDataStatus(profile)
 	fmt.Println("error=", err)
 	if err != nil {
