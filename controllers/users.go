@@ -151,7 +151,7 @@ func EditStatusUser(ctx *gin.Context) {
 		return
 	}
 
-	data := models.UpdateDataStatus(profile)
+	data, _ := models.UpdateDataStatus(profile)
 	fmt.Println("error=", err)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, Response{

@@ -1,3 +1,7 @@
+CREATE TABLE role ( id SERIAL PRIMARY KEY, name VARCHAR(80) );
+
+INSERT INTO role (name) VALUES ('admin'), ('user');
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255),
@@ -6,29 +10,10 @@ CREATE TABLE users (
     phone_number VARCHAR(13),
     role_id INT REFERENCES role (id),
     image VARCHAR(255),
+    status VARCHAR(20),
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP
-);
-
-CREATE TABLE doctor (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(80),
-    spesialis VARCHAR(80),
-    layanan int,
-    created_at TIMESTAMP DEFAULT now(),
-    updated_at TIMESTAMP
-);
-
-INSERT INTO
-    doctor (name, spesialis)
-VALUES ('dr. Andi', 'Bidan'),
-    ('dr. Budi', 'Dokter Anak'),
-    ('dr. Citra', 'Trapis'),
-    ('dr. Dedi', 'Anak');
-
-CREATE TABLE role ( id SERIAL PRIMARY KEY, name VARCHAR(80) );
-
-INSERT INTO role (name) VALUES ('admin'), ('user');
+)
 
 DROP TABLE users CASCADE;
 
@@ -45,8 +30,6 @@ CREATE TABLE reserve (
 );
 
 SELECT * FROM users;
-
-SELECT
 
 select * from role;
 

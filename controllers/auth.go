@@ -58,6 +58,7 @@ func AuthRegister(ctx *gin.Context) {
 		User_Id:      form.Id,
 		Role_Id:      2,
 		Image:        "",
+		Status:       "on progress",
 	}
 
 	models.AddUsers(profile)

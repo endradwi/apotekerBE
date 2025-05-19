@@ -24,3 +24,39 @@ func DB() *pgx.Conn {
 	}
 	return conn
 }
+
+// package lib
+
+// import (
+// 	"context"
+// 	"fmt"
+// 	"os"
+
+// 	"github.com/jackc/pgx/v5"
+// 	"github.com/joho/godotenv"
+// )
+
+// func DB() *pgx.Conn {
+// 	// Load environment variables from .env file
+// 	if err := godotenv.Load(); err != nil {
+// 		fmt.Println("❌ Failed to load .env file:", err)
+// 		return nil
+// 	}
+
+// 	// Get DB URL from env
+// 	connString := os.Getenv("SUPABASE_DB_URL")
+// 	if connString == "" {
+// 		fmt.Println("❌ SUPABASE_DB_URL is empty")
+// 		return nil
+// 	}
+
+// 	// Connect directly using the connection string
+// 	conn, err := pgx.Connect(context.Background(), connString)
+// 	if err != nil {
+// 		fmt.Println("❌ Failed to connect to Supabase DB:", err)
+// 		return nil
+// 	}
+
+// 	fmt.Println("✅ Connected to Supabase DB")
+// 	return conn
+// }

@@ -135,16 +135,17 @@ func UpdateDataUser(user Profile, userId int) error {
 }
 
 type Status struct {
-	Id           int     `form:"id"` // ID tetap wajib, bukan pointer
-	Full_Name    *string `form:"full_name"`
+	Id           int     `form:"id"`
+	Full_Name    *string `form:"fullname"`
 	Phone_number *string `form:"phone_number"`
 	Role_Id      *int    `form:"role_id"`
 	Image        *string `form:"image"`
 	Email        *string `form:"email"`
 	Password     *string `form:"password"`
+	Status       *string `form:"status"`
 }
 
-func UpdateDataStatus(user Status) error {
+func UpdateDataStatus(user Status) (Status, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
@@ -188,14 +189,42 @@ func UpdateDataStatus(user Status) error {
 		paramIndex++
 	}
 
+	if user.Status != nil {
+		query += fmt.Sprintf("status = $%d,", paramIndex)
+		params = append(params, *user.Status)
+		paramIndex++
+	}
+
 	// hapus koma terakhir
 	query = strings.TrimSuffix(query, ",")
 
+	// tambah klausa WHERE
 	query += fmt.Sprintf(" WHERE id = $%d", paramIndex)
 	params = append(params, user.Id)
 
 	_, err := conn.Exec(context.Background(), query, params...)
-	return err
+	if err != nil {
+		return Status{}, err
+	}
+
+	// Ambil data user yang telah diperbarui
+	var updatedUser Status
+	row := conn.QueryRow(context.Background(), "SELECT id, fullname, phone_number, role_id, image, email, password, status FROM users WHERE id = $1", user.Id)
+	err = row.Scan(
+		&updatedUser.Id,
+		&updatedUser.Full_Name,
+		&updatedUser.Phone_number,
+		&updatedUser.Role_Id,
+		&updatedUser.Image,
+		&updatedUser.Email,
+		&updatedUser.Password,
+		&updatedUser.Status,
+	)
+	if err != nil {
+		return Status{}, err
+	}
+
+	return updatedUser, nil
 }
 
 func CreateUser(user Profile) (Profile, error) {
