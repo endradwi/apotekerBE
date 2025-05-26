@@ -3,7 +3,9 @@ package controllers
 import (
 	"apotekerBE/models"
 	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,10 +21,6 @@ func CreateData(ctx *gin.Context) {
 	}
 	var form models.StatusRegister
 	err := ctx.ShouldBind(&form)
-	fmt.Println("Content-Type:", ctx.ContentType())
-	fmt.Println("form data", form)
-	fmt.Println("date:", err)
-	fmt.Println("date=", form.Date)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, Response{
 			Success: false,
@@ -41,7 +39,8 @@ func CreateData(ctx *gin.Context) {
 			Complaint:    form.Complaint,
 			User_id:      form.User_id,
 		},
-		Status: "Pending",
+		Status:   "Pending",
+		RecMedic: "-",
 	}
 	fmt.Println("data date=", data.Date)
 	reserve, err := models.AddReserve(data)
@@ -56,18 +55,52 @@ func CreateData(ctx *gin.Context) {
 }
 
 func GetAllReserveAdmin(ctx *gin.Context) {
-	users, err := models.GetAllReserve()
+	search := ctx.DefaultQuery("search", "")
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "5"))
+	sortmovie := ctx.DefaultQuery("sort", "ASC")
+	if sortmovie != "ASC" {
+		sortmovie = "DESC"
+	}
+
+	// Ambil data reservasi langsung dari database
+	users, err := models.GetAllReserve(page, limit, search, sortmovie)
 	if err != nil {
 		fmt.Println("Error Get All User", err)
 		ctx.JSON(http.StatusInternalServerError, Response{
 			Success: false,
-			Message: "Failed to get users"})
+			Message: "Failed to get users",
+		})
 		return
 	}
 
+	// Ambil jumlah total data
+	count := models.CountDataAll(search)
+
+	// Hitung total halaman
+	totalPage := int(math.Ceil(float64(count) / float64(limit)))
+
+	nextPage := page + 1
+	if nextPage > totalPage {
+		nextPage = totalPage
+	}
+
+	prevPage := page - 1
+	if prevPage < 2 {
+		prevPage = 0
+	}
+
+	// Return response ke client
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Get All Reserve User",
+		PageInfo: PageInfo{
+			CurentPage: page,
+			NextPage:   nextPage,
+			PrevPage:   prevPage,
+			TotalPage:  totalPage,
+			TotalData:  count,
+		},
 		Results: users,
 	})
 }
@@ -95,4 +128,48 @@ func GetAllReserve(ctx *gin.Context) {
 		Message: "Get All Reserve User By ID",
 		Results: users,
 	})
+}
+
+func UpdateStatus(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, Response{
+			Success: false,
+			Message: "Invalid ID",
+		})
+		return
+	}
+	fmt.Println("ID param =", id)
+	var form models.StatusRegister
+	err = ctx.ShouldBind(&form)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, Response{
+			Success: false,
+			Message: "Invalid Data",
+		})
+		return
+	}
+
+	form.Id = id
+	data, err := models.UpdateStatus(form)
+	fmt.Println("Data =", data)
+	fmt.Println("Form Data =", form)
+	fmt.Println("Form User ID =", form.User_id)
+	fmt.Println("Form Status =", form.Status)
+	fmt.Println("Form RecMedic =", form.RecMedic)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, Response{
+			Success: false,
+			Message: "Failed to update status",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, Response{
+		Success: true,
+		Message: "Update Status Success",
+		Results: data,
+	})
+
 }

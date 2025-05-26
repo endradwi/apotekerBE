@@ -129,7 +129,7 @@ func EditProfile(ctx *gin.Context) {
 		Message: "Update User Success",
 	})
 }
-func EditStatusUser(ctx *gin.Context) {
+func EditRoleUser(ctx *gin.Context) {
 	idParam := ctx.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -140,7 +140,7 @@ func EditStatusUser(ctx *gin.Context) {
 		return
 	}
 	fmt.Println("ID param =", id)
-	var profile models.Status
+	var profile models.Role
 	profile.Id = id
 	err = ctx.ShouldBind(&profile)
 	if err != nil {
@@ -151,7 +151,7 @@ func EditStatusUser(ctx *gin.Context) {
 		return
 	}
 
-	data, _ := models.UpdateDataStatus(profile)
+	data := models.UpdateDataRole(profile)
 	fmt.Println("error=", err)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, Response{
@@ -218,12 +218,6 @@ func AddAdmin(ctx *gin.Context) {
 		}
 		formData.Image = storedFile
 	}
-
-	// Hash password jika ada
-	// if formData.Password != "" {
-	// 	hash := lib.CreateHash(formData.Password)
-	// 	formData.Password = hash
-	// }
 
 	data, err := models.CreateUser(formData)
 	if err != nil {

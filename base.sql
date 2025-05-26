@@ -2,6 +2,10 @@ CREATE TABLE role ( id SERIAL PRIMARY KEY, name VARCHAR(80) );
 
 INSERT INTO role (name) VALUES ('admin'), ('user');
 
+SELECT * FROM users;
+
+DROP TABLE reserve;
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255),
@@ -10,12 +14,13 @@ CREATE TABLE users (
     phone_number VARCHAR(13),
     role_id INT REFERENCES role (id),
     image VARCHAR(255),
-    status VARCHAR(20),
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP
 )
 
 DROP TABLE users CASCADE;
+
+select * from reserve;
 
 CREATE TABLE reserve (
     id SERIAL PRIMARY KEY,
@@ -26,7 +31,10 @@ CREATE TABLE reserve (
     doctor VARCHAR(60),
     complaint VARCHAR(255),
     user_id INT REFERENCES users (id),
-    status VARCHAR(20)
+    status VARCHAR(20),
+    rec_medic VARCHAR(255),
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP
 );
 
 SELECT * FROM users;
