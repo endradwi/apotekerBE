@@ -10,6 +10,23 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type ReserveData struct {
+	Id           int       `json:"id" form:"id"`
+	Fullname     string    `json:"fullname" form:"fullname"`
+	Phone_number string    `json:"phone_number" form:"phone_number"`
+	Age          string    `json:"age" form:"age"`
+	Date         time.Time `json:"date" form:"date"`
+	Doctor       string    `json:"doctor" form:"doctor"`
+	Complaint    string    `json:"complaint" form:"complaint"`
+	User_id      int       `json:"user_id" form:"user_id"`
+}
+
+type StatusRegister struct {
+	ReserveData
+	RecMedic string `json:"rec_medic" form:"rec_medic"`
+	Status   string `json:"status" form:"status"`
+}
+
 func AddReserve(reserve StatusRegister) (StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
@@ -38,7 +55,7 @@ func GetAllReserve(page int, limit int, search string, sort string) ([]StatusReg
 	// var getAll []StatusRegister
 	offset := (page - 1) * limit
 	search = fmt.Sprintf("%%%s%%", search)
-	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id, status FROM reserve
+	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id, status, rec_medic FROM reserve
 	WHERE fullname ILIKE $1
 	ORDER BY date %s
 	LIMIT $2 OFFSET $3`, sort)
@@ -97,23 +114,6 @@ func CountDataAll(search string) int {
 	WHERE fullname ILIKE $1
 	`, search).Scan((&count))
 	return count
-}
-
-type ReserveData struct {
-	Id           int       `json:"id" form:"id"`
-	Fullname     string    `json:"fullname" form:"fullname"`
-	Phone_number string    `json:"phone_number" form:"phone_number"`
-	Age          string    `json:"age" form:"age"`
-	Date         time.Time `json:"date" form:"date"`
-	Doctor       string    `json:"doctor" form:"doctor"`
-	Complaint    string    `json:"complaint" form:"complaint"`
-	User_id      int       `json:"user_id" form:"user_id"`
-}
-
-type StatusRegister struct {
-	ReserveData
-	RecMedic string `json:"rec_medic" form:"rec_medic"`
-	Status   string `json:"status" form:"status"`
 }
 
 func UpdateStatus(status StatusRegister) ([]ReserveData, error) {

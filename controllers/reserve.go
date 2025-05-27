@@ -56,8 +56,14 @@ func CreateData(ctx *gin.Context) {
 
 func GetAllReserveAdmin(ctx *gin.Context) {
 	search := ctx.DefaultQuery("search", "")
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "5"))
+	page, err := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		fmt.Println("Invalid page number:", err)
+	}
+	limit, err := strconv.Atoi(ctx.DefaultQuery("limit", "5"))
+	if err != nil || limit < 1 {
+		fmt.Println("Invalid limit number:", err)
+	}
 	sortmovie := ctx.DefaultQuery("sort", "ASC")
 	if sortmovie != "ASC" {
 		sortmovie = "DESC"
@@ -80,13 +86,13 @@ func GetAllReserveAdmin(ctx *gin.Context) {
 	// Hitung total halaman
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))
 
-	nextPage := page + 1
-	if nextPage > totalPage {
-		nextPage = totalPage
+	nextPage := totalPage - page
+	if nextPage < 0 {
+		nextPage = 0
 	}
 
 	prevPage := page - 1
-	if prevPage < 2 {
+	if prevPage < 1 {
 		prevPage = 0
 	}
 
