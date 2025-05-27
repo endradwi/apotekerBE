@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type Profile struct {
@@ -48,30 +50,33 @@ func FindOneProfile(paramId int) Profile {
 	return profile
 }
 
-func FindAllUsers() ([]Profile, error) {
+func FindAllUsers(page int, limit int, search string, sort string) ([]Profile, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
-	var profiles []Profile
-
-	rows, err := conn.Query(context.Background(), `
-	SELECT id,  fullname, phone_number, role_id, image, email, password 
-	FROM users
-	`)
+	// var profiles []Profile
+	offset := (page - 1) * limit
+	search = fmt.Sprintf("%%%s%%", search)
+	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, role_id, image, email, password FROM users WHERE fullname ILIKE $1 ORDER BY fullname %s LIMIT $2 OFFSET $3`, sort)
+	rows, err := conn.Query(context.Background(), query, search, limit, offset)
 	if err != nil {
 		fmt.Println("Error Find All Users", err)
 		return nil, err
 	}
-
-	for rows.Next() {
-		var profile Profile
-		if err := rows.Scan(&profile.Id, &profile.Full_Name, &profile.Phone_number, &profile.Role_Id, &profile.Image, &profile.Email, &profile.Password); err != nil {
-			return nil, err
-		}
-		profiles = append(profiles, profile)
+	reserve, err := pgx.CollectRows(rows, pgx.RowToStructByName[Profile])
+	if err != nil {
+		fmt.Println("Error Collect Rows", err)
+		return nil, err
 	}
+	// for rows.Next() {
+	// var profile Profile
+	// if err := rows.Scan(&profile.Id, &profile.Full_Name, &profile.Phone_number, &profile.Role_Id, &profile.Image, &profile.Email, &profile.Password); err != nil {
+	// return nil, err
+	// }
+	// profiles = append(profiles, profile)
+	// }
 
-	return profiles, nil
+	return reserve, nil
 }
 
 func UpdateDataUser(user Profile, userId int) error {
@@ -227,4 +232,19 @@ func RemoveUser(id int) RemoveUserData {
 	// }
 
 	return user
+}
+
+func CountDataAllUser(search string) int {
+	conn := lib.DB()
+	defer conn.Close(context.Background())
+
+	var count int
+	search = fmt.Sprintf("%%%s%%", search)
+
+	conn.QueryRow(context.Background(), `
+	SELECT COUNT(id)
+	FROM users
+	WHERE fullname ILIKE $1
+	`, search).Scan((&count))
+	return count
 }

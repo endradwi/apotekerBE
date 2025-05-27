@@ -4,6 +4,7 @@ import (
 	"apotekerBE/lib"
 	"apotekerBE/models"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -33,7 +34,20 @@ func GetUser(ctx *gin.Context) {
 }
 
 func GetAllUser(ctx *gin.Context) {
-	users, err := models.FindAllUsers()
+	search := ctx.DefaultQuery("search", "")
+	page, err := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		fmt.Println("Invalid page number:", err)
+	}
+	limit, err := strconv.Atoi(ctx.DefaultQuery("limit", "5"))
+	if err != nil || limit < 1 {
+		fmt.Println("Invalid limit number:", err)
+	}
+	sortUser := ctx.DefaultQuery("sort", "ASC")
+	if sortUser != "ASC" {
+		sortUser = "DESC"
+	}
+	users, err := models.FindAllUsers(page, limit, search, sortUser)
 	if err != nil {
 		fmt.Println("Error Get All User", err)
 		ctx.JSON(http.StatusInternalServerError, Response{
@@ -41,10 +55,32 @@ func GetAllUser(ctx *gin.Context) {
 			Message: "Failed to get users"})
 		return
 	}
+	// Ambil jumlah total data
+	count := models.CountDataAllUser(search)
+
+	// Hitung total halaman
+	totalPage := int(math.Ceil(float64(count) / float64(limit)))
+
+	nextPage := totalPage - page
+	if nextPage < 0 {
+		nextPage = 0
+	}
+
+	prevPage := page - 1
+	if prevPage < 1 {
+		prevPage = 0
+	}
 
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Get All User",
+		PageInfo: PageInfo{
+			CurentPage: page,
+			NextPage:   nextPage,
+			PrevPage:   prevPage,
+			TotalPage:  totalPage,
+			TotalData:  count,
+		},
 		Results: users,
 	})
 }
