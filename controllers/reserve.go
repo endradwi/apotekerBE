@@ -64,13 +64,13 @@ func GetAllReserveAdmin(ctx *gin.Context) {
 	if err != nil || limit < 1 {
 		fmt.Println("Invalid limit number:", err)
 	}
-	sortmovie := ctx.DefaultQuery("sort", "ASC")
-	if sortmovie != "ASC" {
-		sortmovie = "DESC"
+	sortUser := ctx.DefaultQuery("sort", "ASC")
+	if sortUser != "ASC" {
+		sortUser = "DESC"
 	}
 
 	// Ambil data reservasi langsung dari database
-	users, err := models.GetAllReserve(page, limit, search, sortmovie)
+	users, err := models.GetAllReserve(page, limit, search, sortUser)
 	if err != nil {
 		fmt.Println("Error Get All User", err)
 		ctx.JSON(http.StatusInternalServerError, Response{
@@ -120,7 +120,21 @@ func GetAllReserve(ctx *gin.Context) {
 		})
 		return
 	}
-	users, err := models.GetAllReserveByUser(val.(int))
+	search := ctx.DefaultQuery("search", "")
+	page, err := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		fmt.Println("Invalid page number:", err)
+	}
+	limit, err := strconv.Atoi(ctx.DefaultQuery("limit", "5"))
+	if err != nil || limit < 1 {
+		fmt.Println("Invalid limit number:", err)
+	}
+	sortUser := ctx.DefaultQuery("sort", "ASC")
+	if sortUser != "ASC" {
+		sortUser = "DESC"
+	}
+
+	users, err := models.GetAllReserveByUser(val.(int), page, limit, search, sortUser)
 	if err != nil {
 		fmt.Println("Error Get All User", err)
 		ctx.JSON(http.StatusInternalServerError, Response{
@@ -128,10 +142,32 @@ func GetAllReserve(ctx *gin.Context) {
 			Message: "Failed to get users"})
 		return
 	}
+	// Ambil jumlah total data
+	count := models.CountDataAll(search)
+
+	// Hitung total halaman
+	totalPage := int(math.Ceil(float64(count) / float64(limit)))
+
+	nextPage := totalPage - page
+	if nextPage < 0 {
+		nextPage = 0
+	}
+
+	prevPage := page - 1
+	if prevPage < 1 {
+		prevPage = 0
+	}
 
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Get All Reserve User By ID",
+		PageInfo: PageInfo{
+			CurentPage: page,
+			NextPage:   nextPage,
+			PrevPage:   prevPage,
+			TotalPage:  totalPage,
+			TotalData:  count,
+		},
 		Results: users,
 	})
 }

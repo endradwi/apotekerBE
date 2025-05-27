@@ -76,29 +76,34 @@ func GetAllReserve(page int, limit int, search string, sort string) ([]StatusReg
 
 }
 
-func GetAllReserveByUser(userId int) ([]StatusRegister, error) {
+func GetAllReserveByUser(userId int, page int, limit int, search string, sort string) ([]StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	var getAll []StatusRegister
-	rows, err := conn.Query(context.Background(), `
-	SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id , status
-	FROM reserve
-	WHERE user_id = $1
-	`, userId)
+	// var getAll []StatusRegister
+	offset := (page - 1) * limit
+	search = fmt.Sprintf("%%%s%%", search)
+	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id, status, rec_medic FROM reserve
+	WHERE user_id = $1 OR fullname ILIKE $2 ORDER BY date %s
+	LIMIT $3 OFFSET $4 `, sort)
+	rows, err := conn.Query(context.Background(), query, userId, search, limit, offset)
 	if err != nil {
 		fmt.Println("Error Find All Users", err)
 		return nil, err
 	}
-
-	for rows.Next() {
-		var data StatusRegister
-		if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id, &data.Status); err != nil {
-			return nil, err
-		}
-		getAll = append(getAll, data)
-
+	reserve, err := pgx.CollectRows(rows, pgx.RowToStructByName[StatusRegister])
+	if err != nil {
+		fmt.Println("Error Collect Rows", err)
+		return nil, err
 	}
-	return getAll, err
+	// for rows.Next() {
+	// var data StatusRegister
+	// if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id, &data.Status); err != nil {
+	// return nil, err
+	// }
+	// getAll = append(getAll, data)
+	//
+	// }
+	return reserve, err
 
 }
 func CountDataAll(search string) int {
