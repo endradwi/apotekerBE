@@ -95,6 +95,10 @@ func AuthLogin(ctx *gin.Context) {
 	}{
 		UserId: foundUser.Id,
 	})
+	combine := gin.H{
+		"token":   token,
+		"role_id": foundUser.Role_Id,
+	}
 
 	ctx.SetCookie("token", token, 3600, "/", "", false, false)
 
@@ -104,7 +108,7 @@ func AuthLogin(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Login Success",
-		Results: token,
+		Results: combine,
 	})
 
 }

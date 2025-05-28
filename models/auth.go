@@ -33,14 +33,14 @@ type RelationProfile struct {
 
 type ListUser []Users
 
-func FindOneUserByEmail(email string) Users {
+func FindOneUserByEmail(email string) RelationProfile {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	var user Users
+	var user RelationProfile
 	conn.QueryRow(context.Background(), `
-	SELECT id, email, password 
+	SELECT id, email, password, role_id 
 	FROM users WHERE email = $1
-	`, email).Scan(&user.Id, &user.Email, &user.Password)
+	`, email).Scan(&user.Id, &user.Email, &user.Password, &user.Role_Id)
 	return user
 }
 

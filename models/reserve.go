@@ -83,7 +83,7 @@ func GetAllReserveByUser(userId int, page int, limit int, search string, sort st
 	offset := (page - 1) * limit
 	search = fmt.Sprintf("%%%s%%", search)
 	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id, status, rec_medic FROM reserve
-	WHERE user_id = $1 OR fullname ILIKE $2 ORDER BY date %s
+	WHERE user_id = $1 AND fullname ILIKE $2 ORDER BY date %s
 	LIMIT $3 OFFSET $4 `, sort)
 	rows, err := conn.Query(context.Background(), query, userId, search, limit, offset)
 	if err != nil {
