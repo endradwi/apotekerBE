@@ -96,7 +96,7 @@ func AuthLogin(ctx *gin.Context) {
 		UserId: foundUser.Id,
 	})
 
-	ctx.SetCookie("token", token, 3600*24*7, "/", "", false, false)
+	ctx.SetCookie("token", token, 3600, "/", "", false, false)
 
 	// })
 
