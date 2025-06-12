@@ -19,6 +19,15 @@ type Profile struct {
 	Password     string `json:"password" form:"password"`
 }
 
+type CreateProfile struct {
+	Id           int    `json:"id" form:"id"`
+	Full_Name    string `json:"fullname" form:"fullname"`
+	Phone_number string `json:"phone_number" form:"phone_number"`
+	Role_Id      int    `json:"role_id" form:"role_id"`
+	Email        string `json:"email" form:"email"`
+	Password     string `json:"password" form:"password"`
+}
+
 type PointProfile struct {
 	Profile
 	Point int
@@ -203,22 +212,43 @@ func UpdateDataRole(user Role) error {
 	return err
 }
 
-func CreateUser(user Profile) (Profile, error) {
+func CreateUser(user CreateProfile) (CreateProfile, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
-	var userData Profile
+	var userData CreateProfile
 	err := conn.QueryRow(context.Background(), `
-	INSERT INTO users (fullname, phone_number, role_id, image, email, password)
-	VALUES ($1, $2, $3, $4, $5, $6)
-	RETURNING id, fullname, phone_number, role_id, image, email, password
-	`, user.Full_Name, user.Phone_number, user.Role_Id, user.Image, user.Email, user.Password).Scan(&userData.Id, &userData.Full_Name, &userData.Phone_number, &userData.Role_Id, &userData.Image, &userData.Email, &userData.Password)
+	INSERT INTO users (fullname, phone_number, role_id, email, password)
+	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id, fullname, phone_number, role_id, email, password
+	`, user.Full_Name, user.Phone_number, user.Role_Id, user.Email, user.Password).Scan(&userData.Id, &userData.Full_Name, &userData.Phone_number, &userData.Role_Id, &userData.Email, &userData.Password)
 
 	if err != nil {
 		return userData, err
 	}
 
 	return userData, nil
+}
+
+func FindUserByEmail(email string) (CreateProfile, error) {
+	conn := lib.DB()
+	defer conn.Close(context.Background())
+
+	var user CreateProfile
+	err := conn.QueryRow(context.Background(), `
+	SELECT id, fullname, phone_number, role_id, email, password
+	FROM users
+	WHERE email = $1
+	`, email).Scan(&user.Id, &user.Full_Name, &user.Phone_number, &user.Role_Id, &user.Email, &user.Password)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return user, nil // Return empty user if not found
+		}
+		return user, err // Return error if any other error occurs
+	}
+
+	return user, nil
 }
 
 func RemoveUser(id int) RemoveUserData {

@@ -205,8 +205,25 @@ func EditRoleUser(ctx *gin.Context) {
 }
 
 func AddAdmin(ctx *gin.Context) {
-	var formData models.Profile
+	var formData models.CreateProfile
 	err := ctx.ShouldBind(&formData)
+	findEmail, err := models.FindUserByEmail(formData.Email)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, Response{
+			Success: false,
+			Message: "Failed to check email",
+		})
+		return
+	}
+	if formData.Email == findEmail.Email {
+		ctx.JSON(http.StatusBadRequest, Response{
+			Success: false,
+			Message: "Email already exists",
+		})
+		return
+	}
+	fmt.Println("Find email =", findEmail)
+	fmt.Println("Data Email =", formData.Email)
 	fmt.Println("Form data 1=", formData.Password)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, Response{
@@ -215,45 +232,10 @@ func AddAdmin(ctx *gin.Context) {
 		})
 		return
 	}
+	hash := lib.CreateHash(formData.Password)
+	formData.Password = hash
 
-	var storedFile string
-	file, err := ctx.FormFile("image")
-	if err == nil && file != nil && file.Filename != "" {
-		filename := uuid.New().String()
-		splittedFilename := strings.Split(file.Filename, ".")
-		ext := strings.ToLower(splittedFilename[len(splittedFilename)-1])
-
-		if ext != "jpg" && ext != "jpeg" && ext != "png" {
-			ctx.JSON(http.StatusBadRequest, Response{
-				Success: false,
-				Message: "File must be .jpg, .jpeg, or .png",
-			})
-			return
-		}
-
-		// Validasi size
-		maxfile := 1 * 1024 * 1024
-		if file.Size > int64(maxfile) {
-			ctx.JSON(http.StatusBadRequest, Response{
-				Success: false,
-				Message: "File is too large (max 1MB)",
-			})
-			return
-		}
-
-		// Simpan file
-		storedFile = fmt.Sprintf("%s.%s", filename, ext)
-		savePath := fmt.Sprintf("upload/admin/%s", storedFile)
-		err = ctx.SaveUploadedFile(file, savePath)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, Response{
-				Success: false,
-				Message: "Failed to save file",
-			})
-			return
-		}
-		formData.Image = storedFile
-	}
+	fmt.Println("Form Password =", formData.Password)
 
 	data, err := models.CreateUser(formData)
 	if err != nil {
