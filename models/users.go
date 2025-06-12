@@ -66,7 +66,7 @@ func FindAllUsers(page int, limit int, search string, sort string) ([]Profile, e
 	// var profiles []Profile
 	offset := (page - 1) * limit
 	search = fmt.Sprintf("%%%s%%", search)
-	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, role_id, image, email, password FROM users WHERE fullname ILIKE $1 ORDER BY fullname %s LIMIT $2 OFFSET $3`, sort)
+	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, role_id, COALESCE(image, '-') as image, email, password FROM users WHERE fullname ILIKE $1 ORDER BY fullname %s LIMIT $2 OFFSET $3`, sort)
 	rows, err := conn.Query(context.Background(), query, search, limit, offset)
 	if err != nil {
 		fmt.Println("Error Find All Users", err)
@@ -236,16 +236,15 @@ func FindUserByEmail(email string) (CreateProfile, error) {
 
 	var user CreateProfile
 	err := conn.QueryRow(context.Background(), `
-	SELECT id, fullname, phone_number, role_id, email, password
-	FROM users
-	WHERE email = $1
+	SELECT id, fullname, phone_number, role_id, email, password 
+	FROM users WHERE email = $1
 	`, email).Scan(&user.Id, &user.Full_Name, &user.Phone_number, &user.Role_Id, &user.Email, &user.Password)
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return user, nil // Return empty user if not found
+			return user, nil // tidak ditemukan
 		}
-		return user, err // Return error if any other error occurs
+		return user, err // error lain
 	}
 
 	return user, nil
