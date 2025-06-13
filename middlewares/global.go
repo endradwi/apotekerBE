@@ -16,43 +16,81 @@ import (
 
 func ValidationToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
-		head := ctx.GetHeader("Authorization")
-
-		if head == "" {
-			ctx.JSON(http.StatusNotFound, controllers.Response{
+		authHeader := ctx.GetHeader("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			ctx.JSON(http.StatusUnauthorized, controllers.Response{
 				Success: false,
-				Message: "Token not found",
+				Message: "Missing or invalid Authorization header",
 			})
 			ctx.Abort()
 			return
 		}
-		token := strings.Split(head, " ")[1:][0]
 
-		tok, err := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
-		if err != nil {
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 {
 			ctx.JSON(http.StatusUnauthorized, controllers.Response{
 				Success: false,
-				Message: fmt.Sprintf("Unauthorized: %s", err.Error()),
+				Message: "Invalid token format",
 			})
-		}
-
-		out := make(map[string]interface{})
-
-		godotenv.Load()
-		err = tok.Claims([]byte(lib.GetMD5hash(os.Getenv("JWT_SECRET"))), &out)
-
-		ctx.Set("userId", int(out["userId"].(float64)))
-
-		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, controllers.Response{
-				Success: false,
-				Message: "Unauthorized",
-			})
-
 			ctx.Abort()
+			return
 		}
 
+		tokenString := parts[1]
+		tok, err := jwt.ParseSigned(tokenString, []jose.SignatureAlgorithm{jose.HS256})
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, controllers.Response{
+				Success: false,
+				Message: fmt.Sprintf("Failed to parse token: %s", err.Error()),
+			})
+			ctx.Abort()
+			return
+		}
+
+		_ = godotenv.Load()
+		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			ctx.JSON(http.StatusInternalServerError, controllers.Response{
+				Success: false,
+				Message: "Server error: JWT secret not configured",
+			})
+			ctx.Abort()
+			return
+		}
+
+		var claims map[string]interface{}
+		err = tok.Claims([]byte(lib.GetMD5hash(secret)), &claims)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, controllers.Response{
+				Success: false,
+				Message: "Unauthorized: invalid claims",
+			})
+			ctx.Abort()
+			return
+		}
+
+		// Convert userId safely
+		userIDRaw, ok := claims["userId"]
+		if !ok {
+			ctx.JSON(http.StatusUnauthorized, controllers.Response{
+				Success: false,
+				Message: "Unauthorized: userId missing in token",
+			})
+			ctx.Abort()
+			return
+		}
+
+		userIDFloat, ok := userIDRaw.(float64)
+		if !ok {
+			ctx.JSON(http.StatusUnauthorized, controllers.Response{
+				Success: false,
+				Message: "Unauthorized: invalid userId type",
+			})
+			ctx.Abort()
+			return
+		}
+
+		ctx.Set("userId", int(userIDFloat))
 		ctx.Next()
 	}
 }
