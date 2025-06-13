@@ -16,27 +16,31 @@ import (
 
 func ValidationToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		var tokenString string
+
+		// 1. Coba ambil dari Authorization header
 		authHeader := ctx.GetHeader("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			ctx.JSON(http.StatusUnauthorized, controllers.Response{
-				Success: false,
-				Message: "Missing or invalid Authorization header",
-			})
-			ctx.Abort()
-			return
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			parts := strings.Split(authHeader, " ")
+			if len(parts) == 2 {
+				tokenString = parts[1]
+			}
 		}
 
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 {
-			ctx.JSON(http.StatusUnauthorized, controllers.Response{
-				Success: false,
-				Message: "Invalid token format",
-			})
-			ctx.Abort()
-			return
+		// 2. Kalau kosong, coba ambil dari cookie
+		if tokenString == "" {
+			cookie, err := ctx.Cookie("token")
+			if err != nil {
+				ctx.JSON(http.StatusUnauthorized, controllers.Response{
+					Success: false,
+					Message: "Missing token",
+				})
+				ctx.Abort()
+				return
+			}
+			tokenString = cookie
 		}
 
-		tokenString := parts[1]
 		tok, err := jwt.ParseSigned(tokenString, []jose.SignatureAlgorithm{jose.HS256})
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, controllers.Response{
