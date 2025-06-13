@@ -31,7 +31,10 @@ func ValidationToken() gin.HandlerFunc {
 
 		tok, err := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
 		if err != nil {
-			fmt.Println("Error parsing token:", err)
+			ctx.JSON(http.StatusUnauthorized, controllers.Response{
+				Success: false,
+				Message: fmt.Sprintf("Unauthorized: %s", err.Error()),
+			})
 		}
 
 		out := make(map[string]interface{})
