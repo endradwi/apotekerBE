@@ -18,6 +18,9 @@ func Routers(router *gin.Engine) {
 			"User_ID", // <- tambahkan custom header ini
 		},
 		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://apoteker-fe-production.up.railway.app"
+		},
 	}))
 
 	AuthRouters(router.Group("/auth"))
