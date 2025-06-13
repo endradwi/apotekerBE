@@ -3,6 +3,7 @@ package middlewares
 import (
 	"apotekerBE/controllers"
 	"apotekerBE/lib"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -28,12 +29,15 @@ func ValidationToken() gin.HandlerFunc {
 		}
 		token := strings.Split(head, " ")[1:][0]
 
-		tok, _ := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
+		tok, err := jwt.ParseSigned(token, []jose.SignatureAlgorithm{jose.HS256})
+		if err != nil {
+			fmt.Println("Error parsing token:", err)
+		}
 
 		out := make(map[string]interface{})
 
 		godotenv.Load()
-		err := tok.Claims([]byte(lib.GetMD5hash(os.Getenv("JWT_SECRET"))), &out)
+		err = tok.Claims([]byte(lib.GetMD5hash(os.Getenv("JWT_SECRET"))), &out)
 
 		ctx.Set("userId", int(out["userId"].(float64)))
 
