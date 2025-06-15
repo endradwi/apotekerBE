@@ -100,7 +100,7 @@ func AuthLogin(ctx *gin.Context) {
 		"role_id": foundUser.Role_Id,
 	}
 
-	ctx.SetCookie("token", token, 3600, "/", "", false, true)
+	ctx.SetCookie("token", token, 3600, "/", "", true, true)
 
 	// })
 
