@@ -7,7 +7,7 @@ import (
 
 func Routers(router *gin.Engine) {
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"https://apoteker-fe-production.up.railway.app"},
+		AllowOrigins: []string{"localhost:3000"}, //https://apoteker-fe-production.up.railway.app
 		AllowMethods: []string{"GET", "POST", "PATCH", "DELETE", "PUT"},
 		AllowHeaders: []string{
 			"Origin",
