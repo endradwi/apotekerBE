@@ -39,7 +39,7 @@ func CreateData(ctx *gin.Context) {
 			Complaint:    form.Complaint,
 			User_id:      form.User_id,
 		},
-		Status:   "Pending",
+		Status:   "pending",
 		RecMedic: "-",
 	}
 	fmt.Println("data date=", data.Date)
