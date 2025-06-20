@@ -143,7 +143,7 @@ func GetAllReserve(ctx *gin.Context) {
 		return
 	}
 	// Ambil jumlah total data
-	count := models.CountDataAll(search)
+	count := models.CountDataAllPasien(val.(int), search)
 
 	// Hitung total halaman
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))
@@ -170,6 +170,7 @@ func GetAllReserve(ctx *gin.Context) {
 		},
 		Results: users,
 	})
+
 }
 
 func UpdateStatus(ctx *gin.Context) {
@@ -195,11 +196,7 @@ func UpdateStatus(ctx *gin.Context) {
 
 	form.Id = id
 	data, err := models.UpdateStatus(form)
-	fmt.Println("Data =", data)
-	fmt.Println("Form Data =", form)
-	fmt.Println("Form User ID =", form.User_id)
-	fmt.Println("Form Status =", form.Status)
-	fmt.Println("Form RecMedic =", form.RecMedic)
+
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, Response{

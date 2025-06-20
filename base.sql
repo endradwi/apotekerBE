@@ -30,11 +30,42 @@ VALUES (
         '1234567890',
         1,
         'https://example.com/image.jpg'
-    )
+    );
+
+SELECT * From reserve WHERE id = 8;
+
+UPDATE reserve SET status = $1, rec_medic = $2 WHERE id = $3
+
+SELECT COUNT(id) FROM reserve WHERE user_id = 8;
+
+UPDATE reserve
+SET
+    rec_medic = 'Minum 3x sehari'
+WHERE
+    fullname = 'tono arinto';
+
+SELECT
+    id,
+    fullname,
+    phone_number,
+    age,
+    date,
+    doctor,
+    complaint,
+    user_id,
+    status,
+    rec_medic
+FROM reserve
+WHERE
+    user_id = $1
 
 DELETE FROM users WHERE id = 20;
 
-select * FROM users;
+select *
+FROM users
+    LEFT JOIN reserve on reserve.user_id = users.id
+WHERE
+    email ILIKE 'yayan@gmail.com';
 
 DROP Table users CASCADE;
 

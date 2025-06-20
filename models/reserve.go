@@ -121,7 +121,30 @@ func CountDataAll(search string) int {
 	return count
 }
 
-func UpdateStatus(status StatusRegister) ([]ReserveData, error) {
+func CountDataAllPasien(userID int, search string) int {
+	conn := lib.DB()
+	defer conn.Close(context.Background())
+
+	var count int
+
+	query := `
+	SELECT COUNT(id)
+	FROM reserve
+	WHERE user_id = $1
+	`
+
+	// Jika kamu ingin pakai search juga
+	if search != "" {
+		query += ` AND (nama ILIKE '%' || $2 || '%')`
+		conn.QueryRow(context.Background(), query, userID, search).Scan(&count)
+	} else {
+		conn.QueryRow(context.Background(), query, userID).Scan(&count)
+	}
+
+	return count
+}
+
+func UpdateStatus(status StatusRegister) ([]StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
@@ -165,6 +188,7 @@ func UpdateStatus(status StatusRegister) ([]ReserveData, error) {
 		paramIndex++
 	}
 	if status.RecMedic != "" {
+		status.RecMedic = lib.ToOrderList(status.RecMedic)
 		query += fmt.Sprintf("rec_medic = $%d,", paramIndex)
 		param = append(param, status.RecMedic)
 		paramIndex++
@@ -184,26 +208,21 @@ func UpdateStatus(status StatusRegister) ([]ReserveData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("gagal update data: %v", err)
 	}
+	fmt.Println("query", query)
 
 	// Ambil semua reservasi milik user tersebut
-	rows, err := conn.Query(context.Background(), `
-		SELECT id, fullname, phone_number, age, date, doctor, complaint, user_id
-		FROM reserve
-		WHERE user_id = $1
-	`, status.User_id)
+	row := conn.QueryRow(context.Background(), `
+	SELECT id, fullname, phone_number, age, date, doctor, complaint, user_id, rec_medic, status
+	FROM reserve
+	WHERE id = $1
+`, status.Id)
+
+	var result StatusRegister
+	err = row.Scan(&result.Id, &result.Fullname, &result.Phone_number, &result.Age, &result.Date, &result.Doctor, &result.Complaint, &result.User_id, &result.RecMedic, &result.Status)
 	if err != nil {
 		return nil, fmt.Errorf("gagal ambil data setelah update: %v", err)
 	}
-	defer rows.Close()
 
-	var results []ReserveData
-	for rows.Next() {
-		var r ReserveData
-		if err := rows.Scan(&r.Id, &r.Fullname, &r.Phone_number, &r.Age, &r.Date, &r.Doctor, &r.Complaint, &r.User_id); err != nil {
-			return nil, fmt.Errorf("gagal scan data: %v", err)
-		}
-		results = append(results, r)
-	}
+	return []StatusRegister{result}, nil
 
-	return results, nil
 }
