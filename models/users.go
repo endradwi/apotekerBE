@@ -41,6 +41,15 @@ type RemoveUserData struct {
 	Image        string `json:"image" form:"-"`
 	Email        string `json:"email" form:"email"`
 }
+type Role struct {
+	Id           int     `form:"id"` // ID tetap wajib, bukan pointer
+	Full_Name    *string `form:"fullname"`
+	Phone_number *string `form:"phone_number"`
+	Role_Id      *int    `form:"role_id"`
+	Image        *string `form:"image"`
+	Email        *string `form:"email"`
+	Password     *string `form:"password"`
+}
 
 type ListProfile []Profile
 
@@ -63,7 +72,6 @@ func FindAllUsers(page int, limit int, search string, sort string) ([]Profile, e
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
-	// var profiles []Profile
 	offset := (page - 1) * limit
 	search = fmt.Sprintf("%%%s%%", search)
 	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, role_id, COALESCE(image, '-') as image, email, password FROM users WHERE email ILIKE $1 ORDER BY email %s LIMIT $2 OFFSET $3`, sort)
@@ -77,13 +85,6 @@ func FindAllUsers(page int, limit int, search string, sort string) ([]Profile, e
 		fmt.Println("Error Collect Rows", err)
 		return nil, err
 	}
-	// for rows.Next() {
-	// var profile Profile
-	// if err := rows.Scan(&profile.Id, &profile.Full_Name, &profile.Phone_number, &profile.Role_Id, &profile.Image, &profile.Email, &profile.Password); err != nil {
-	// return nil, err
-	// }
-	// profiles = append(profiles, profile)
-	// }
 
 	return reserve, nil
 }
@@ -113,7 +114,6 @@ func UpdateDataUser(user Profile, userId int) (Profile, error) {
 		err := conn.QueryRow(context.Background(), `SELECT EXISTS(SELECT 1 FROM role WHERE id = $1)`, user.Role_Id).Scan(&roleExists)
 		if err != nil || !roleExists {
 			fmt.Println(err)
-			// return nil, fmt.Errorf("invalid role_id")
 		}
 		query += fmt.Sprintf("role_id = $%d,", paramIndex)
 		params = append(params, user.Role_Id)
@@ -161,16 +161,6 @@ func UpdateDataUser(user Profile, userId int) (Profile, error) {
 	}
 
 	return updated, nil
-}
-
-type Role struct {
-	Id           int     `form:"id"` // ID tetap wajib, bukan pointer
-	Full_Name    *string `form:"fullname"`
-	Phone_number *string `form:"phone_number"`
-	Role_Id      *int    `form:"role_id"`
-	Image        *string `form:"image"`
-	Email        *string `form:"email"`
-	Password     *string `form:"password"`
 }
 
 func UpdateDataRole(user Role) error {
@@ -270,10 +260,6 @@ func RemoveUser(id int) RemoveUserData {
 	defer conn.Close(context.Background())
 	var user RemoveUserData
 	conn.QueryRow(context.Background(), `DELETE FROM users WHERE id = $1 RETURNING id, fullname, phone_number, role_id, image, email`, id).Scan(&user.Id, &user.Full_Name, &user.Phone_number, &user.Role_Id, &user.Image, &user.Email)
-	// _, err := conn.Exec(context.Background(), `DELETE FROM users WHERE id = $1 Re`, id)
-	// if err != nil {
-	// return err
-	// }
 
 	return user
 }

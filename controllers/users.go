@@ -16,7 +16,6 @@ import (
 
 func GetUser(ctx *gin.Context) {
 	val, isVail := ctx.Get("userId")
-	fmt.Println("Get User =", val)
 	if !isVail {
 		ctx.JSON(http.StatusUnauthorized, Response{
 			Success: false,
@@ -24,7 +23,6 @@ func GetUser(ctx *gin.Context) {
 		})
 	}
 	profile := models.FindOneProfile(val.(int))
-	fmt.Println("Get profile =", profile)
 	if isVail {
 		ctx.JSON(http.StatusOK, Response{
 			Success: true,
@@ -56,7 +54,6 @@ func GetAllUser(ctx *gin.Context) {
 			Message: "Failed to get users"})
 		return
 	}
-	// Ambil jumlah total data
 	count := models.CountDataAllUser(search)
 
 	// Hitung total halaman
@@ -98,7 +95,6 @@ func EditProfile(ctx *gin.Context) {
 
 	userId := val.(int)
 
-	// Gunakan multipart form karena ada file
 	err := ctx.Request.ParseMultipartForm(10 << 20) // 10MB limit
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, Response{
@@ -158,12 +154,10 @@ func EditProfile(ctx *gin.Context) {
 		profile.Image = storedFile
 	}
 
-	// Hash password jika ada
 	if profile.Password != "" {
 		profile.Password = lib.CreateHash(profile.Password)
 	}
 
-	// ✅ Panggil update dan dapatkan data hasil update
 	profileData, err := models.UpdateDataUser(profile, userId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, Response{
@@ -190,7 +184,6 @@ func EditRoleUser(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("ID param =", id)
 	var profile models.Role
 	profile.Id = id
 	err = ctx.ShouldBind(&profile)
@@ -237,9 +230,6 @@ func AddAdmin(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("Find email =", findEmail)
-	fmt.Println("Data Email =", formData.Email)
-	fmt.Println("Form data 1=", formData.Password)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, Response{
 			Success: false,
@@ -249,8 +239,6 @@ func AddAdmin(ctx *gin.Context) {
 	}
 	hash := lib.CreateHash(formData.Password)
 	formData.Password = hash
-
-	fmt.Println("Form Password =", formData.Password)
 
 	data, err := models.CreateUser(formData)
 	if err != nil {
@@ -271,7 +259,6 @@ func AddAdmin(ctx *gin.Context) {
 func DeleteUser(ctx *gin.Context) {
 	id, _ := strconv.Atoi(ctx.Param("id"))
 	deleted := models.RemoveUser(id)
-	fmt.Println("Deleted user =", deleted)
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Deleted Success",

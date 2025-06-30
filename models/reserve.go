@@ -30,17 +30,13 @@ type StatusRegister struct {
 func AddReserve(reserve StatusRegister) (StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	fmt.Println("data baru=", reserve)
-	fmt.Println("date", reserve.Date)
 	var reserveAdd StatusRegister
-	// var tempDate time.Time
+
 	err := conn.QueryRow(context.Background(), `
 	INSERT INTO reserve (fullname, phone_number, age, date,doctor, complaint, user_id, status, rec_medic ) 
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, fullname, phone_number, age, date, doctor, complaint, user_id, status, rec_medic
 	`, reserve.Fullname, reserve.Phone_number, reserve.Age, reserve.Date, reserve.Doctor, reserve.Complaint, reserve.User_id, reserve.Status, reserve.RecMedic).Scan(&reserveAdd.Id, &reserveAdd.Fullname, &reserveAdd.Phone_number, &reserveAdd.Age, &reserveAdd.Date, &reserveAdd.Doctor, &reserveAdd.Complaint, &reserveAdd.User_id, &reserveAdd.Status, &reserveAdd.RecMedic)
 
-	// reserveAdd.Date = CustomDate(tempDate)
-	fmt.Println("Reserve Add = ", reserveAdd)
 	if err != nil {
 		return StatusRegister{}, err
 	}
@@ -52,7 +48,7 @@ func AddReserve(reserve StatusRegister) (StatusRegister, error) {
 func GetAllReserve(page int, limit int, search string, sort string) ([]StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	// var getAll []StatusRegister
+
 	offset := (page - 1) * limit
 	search = fmt.Sprintf("%%%s%%", search)
 	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id, status, rec_medic FROM reserve
@@ -65,13 +61,6 @@ func GetAllReserve(page int, limit int, search string, sort string) ([]StatusReg
 		return nil, err
 	}
 	reserve, _ := pgx.CollectRows(rows, pgx.RowToStructByName[StatusRegister])
-	// for rows.Next() {
-	// 	var data StatusRegister
-	// 	if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id, &data.Status); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	getAll = append(getAll, data)
-	// }
 	return reserve, err
 
 }
@@ -79,7 +68,7 @@ func GetAllReserve(page int, limit int, search string, sort string) ([]StatusReg
 func GetAllReserveByUser(userId int, page int, limit int, search string, sort string) ([]StatusRegister, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
-	// var getAll []StatusRegister
+
 	offset := (page - 1) * limit
 	search = fmt.Sprintf("%%%s%%", search)
 	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, age, date, doctor, complaint, user_id, status, rec_medic FROM reserve
@@ -95,14 +84,7 @@ func GetAllReserveByUser(userId int, page int, limit int, search string, sort st
 		fmt.Println("Error Collect Rows", err)
 		return nil, err
 	}
-	// for rows.Next() {
-	// var data StatusRegister
-	// if err := rows.Scan(&data.Id, &data.Fullname, &data.Phone_number, &data.Age, &data.Date, &data.Doctor, &data.Complaint, &data.User_id, &data.Status); err != nil {
-	// return nil, err
-	// }
-	// getAll = append(getAll, data)
-	//
-	// }
+
 	return reserve, err
 
 }
@@ -133,7 +115,6 @@ func CountDataAllPasien(userID int, search string) int {
 	WHERE user_id = $1
 	`
 
-	// Jika kamu ingin pakai search juga
 	if search != "" {
 		query += ` AND (nama ILIKE '%' || $2 || '%')`
 		conn.QueryRow(context.Background(), query, userID, search).Scan(&count)
@@ -198,19 +179,15 @@ func UpdateStatus(status StatusRegister) ([]StatusRegister, error) {
 		return nil, fmt.Errorf("tidak ada data yang diubah")
 	}
 
-	// Finalisasi query
 	query = strings.TrimSuffix(query, ",")
 	query += fmt.Sprintf(" WHERE id = $%d", paramIndex)
 	param = append(param, status.Id)
 
-	// Eksekusi update
 	_, err := conn.Exec(context.Background(), query, param...)
 	if err != nil {
 		return nil, fmt.Errorf("gagal update data: %v", err)
 	}
-	fmt.Println("query", query)
 
-	// Ambil semua reservasi milik user tersebut
 	row := conn.QueryRow(context.Background(), `
 	SELECT id, fullname, phone_number, age, date, doctor, complaint, user_id, rec_medic, status
 	FROM reserve

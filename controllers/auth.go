@@ -102,9 +102,6 @@ func AuthLogin(ctx *gin.Context) {
 
 	ctx.SetCookie("token", token, 3600, "/", "", true, true)
 
-	// })
-
-	// fmt.Println("data = ", token)
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Login Success",

@@ -51,7 +51,6 @@ func AddUsers(profile RelationProfile) RelationProfile {
 	var profileAdd RelationProfile
 	var user_id int
 
-	// Query pertama: Insert data ke tabel users dan dapatkan user_id
 	err := conn.QueryRow(context.Background(), `
 		INSERT INTO users (email, password, fullname, phone_number, role_id, image) 
 		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
@@ -60,9 +59,6 @@ func AddUsers(profile RelationProfile) RelationProfile {
 		fmt.Println("Error inserting user:", err)
 		return profileAdd
 	}
-	fmt.Println("err =", err)
-
-	fmt.Println("user_id =", user_id)
 
 	return profileAdd
 }

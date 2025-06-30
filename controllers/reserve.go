@@ -42,7 +42,6 @@ func CreateData(ctx *gin.Context) {
 		Status:   "pending",
 		RecMedic: "-",
 	}
-	fmt.Println("data date=", data.Date)
 	reserve, err := models.AddReserve(data)
 	if err != nil {
 		fmt.Println(err)
@@ -69,7 +68,6 @@ func GetAllReserveAdmin(ctx *gin.Context) {
 		sortUser = "DESC"
 	}
 
-	// Ambil data reservasi langsung dari database
 	users, err := models.GetAllReserve(page, limit, search, sortUser)
 	if err != nil {
 		fmt.Println("Error Get All User", err)
@@ -80,10 +78,8 @@ func GetAllReserveAdmin(ctx *gin.Context) {
 		return
 	}
 
-	// Ambil jumlah total data
 	count := models.CountDataAll(search)
 
-	// Hitung total halaman
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))
 
 	nextPage := totalPage - page
@@ -96,7 +92,6 @@ func GetAllReserveAdmin(ctx *gin.Context) {
 		prevPage = 0
 	}
 
-	// Return response ke client
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Get All Reserve User",
@@ -142,10 +137,9 @@ func GetAllReserve(ctx *gin.Context) {
 			Message: "Failed to get users"})
 		return
 	}
-	// Ambil jumlah total data
+
 	count := models.CountDataAllPasien(val.(int), search)
 
-	// Hitung total halaman
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))
 
 	nextPage := totalPage - page
@@ -183,7 +177,6 @@ func UpdateStatus(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("ID param =", id)
 	var form models.StatusRegister
 	err = ctx.ShouldBind(&form)
 	if err != nil {

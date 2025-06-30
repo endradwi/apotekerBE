@@ -73,7 +73,6 @@ func ValidationToken() gin.HandlerFunc {
 			return
 		}
 
-		// Convert userId safely
 		userIDRaw, ok := claims["userId"]
 		if !ok {
 			ctx.JSON(http.StatusUnauthorized, controllers.Response{

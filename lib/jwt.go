@@ -9,8 +9,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// var JWT_SECRET []byte = []byte(GetMD5hash(os.Getenv("JWT_SECRET")))
-
 func GeneretedToken(payload any) string {
 	godotenv.Load()
 	var JWT_SECRET []byte = []byte(GetMD5hash(os.Getenv("JWT_SECRET")))
