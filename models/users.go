@@ -66,7 +66,7 @@ func FindAllUsers(page int, limit int, search string, sort string) ([]Profile, e
 	// var profiles []Profile
 	offset := (page - 1) * limit
 	search = fmt.Sprintf("%%%s%%", search)
-	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, role_id, COALESCE(image, '-') as image, email, password FROM users WHERE fullname ILIKE $1 ORDER BY fullname %s LIMIT $2 OFFSET $3`, sort)
+	query := fmt.Sprintf(`SELECT id,  fullname, phone_number, role_id, COALESCE(image, '-') as image, email, password FROM users WHERE email ILIKE $1 ORDER BY email %s LIMIT $2 OFFSET $3`, sort)
 	rows, err := conn.Query(context.Background(), query, search, limit, offset)
 	if err != nil {
 		fmt.Println("Error Find All Users", err)
@@ -88,7 +88,7 @@ func FindAllUsers(page int, limit int, search string, sort string) ([]Profile, e
 	return reserve, nil
 }
 
-func UpdateDataUser(user Profile, userId int) error {
+func UpdateDataUser(user Profile, userId int) (Profile, error) {
 	conn := lib.DB()
 	defer conn.Close(context.Background())
 
@@ -109,11 +109,11 @@ func UpdateDataUser(user Profile, userId int) error {
 	}
 
 	if user.Role_Id != 0 {
-		// validasi role_id tetap perlu
 		var roleExists bool
 		err := conn.QueryRow(context.Background(), `SELECT EXISTS(SELECT 1 FROM role WHERE id = $1)`, user.Role_Id).Scan(&roleExists)
 		if err != nil || !roleExists {
-			return fmt.Errorf("invalid role_id")
+			fmt.Println(err)
+			// return nil, fmt.Errorf("invalid role_id")
 		}
 		query += fmt.Sprintf("role_id = $%d,", paramIndex)
 		params = append(params, user.Role_Id)
@@ -141,11 +141,26 @@ func UpdateDataUser(user Profile, userId int) error {
 	// hapus koma terakhir
 	query = strings.TrimSuffix(query, ",")
 
-	query += fmt.Sprintf(" WHERE id = $%d", paramIndex)
+	// Tambahkan WHERE dan RETURNING
+	query += fmt.Sprintf(" WHERE id = $%d RETURNING id, fullname, phone_number, role_id, image, email", paramIndex)
 	params = append(params, userId)
 
-	_, err := conn.Exec(context.Background(), query, params...)
-	return err
+	// Scan ke dalam struct Profile
+	var updated Profile
+	err := conn.QueryRow(context.Background(), query, params...).Scan(
+		&updated.Id,
+		&updated.Full_Name,
+		&updated.Phone_number,
+		&updated.Role_Id,
+		&updated.Image,
+		&updated.Email,
+	)
+	if err != nil {
+		fmt.Println(err)
+		// return nil, err
+	}
+
+	return updated, nil
 }
 
 type Role struct {

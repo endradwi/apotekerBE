@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -88,32 +89,47 @@ func GetAllUser(ctx *gin.Context) {
 func EditProfile(ctx *gin.Context) {
 	val, isAvail := ctx.Get("userId")
 	if !isAvail {
-		ctx.JSON(http.StatusNotFound, Response{
+		ctx.JSON(http.StatusUnauthorized, Response{
 			Success: false,
-			Message: "Unauthorized id",
+			Message: "Unauthorized ID",
+		})
+		return
+	}
+
+	userId := val.(int)
+
+	// Gunakan multipart form karena ada file
+	err := ctx.Request.ParseMultipartForm(10 << 20) // 10MB limit
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, Response{
+			Success: false,
+			Message: "Failed to parse form",
 		})
 		return
 	}
 
 	var profile models.Profile
-	err := ctx.ShouldBind(&profile)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, Response{
-			Success: false,
-			Message: "Invalid input",
-		})
-		return
+	profile.Full_Name = ctx.PostForm("fullname")
+	profile.Phone_number = ctx.PostForm("phone_number")
+	profile.Email = ctx.PostForm("email")
+	profile.Password = ctx.PostForm("password")
+
+	// Handle role_id if diberikan
+	roleIdStr := ctx.PostForm("role_id")
+	if roleIdStr != "" {
+		roleId, convErr := strconv.Atoi(roleIdStr)
+		if convErr == nil {
+			profile.Role_Id = roleId
+		}
 	}
 
-	var storedFile string
-
+	// Optional image upload
 	file, err := ctx.FormFile("image")
 	if err == nil && file != nil && file.Filename != "" {
 		filename := uuid.New().String()
-		splittedFilename := strings.Split(file.Filename, ".")
-		ext := strings.ToLower(splittedFilename[len(splittedFilename)-1])
+		ext := strings.ToLower(filepath.Ext(file.Filename)) // includes dot
 
-		if ext != "jpg" && ext != "jpeg" && ext != "png" {
+		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
 			ctx.JSON(http.StatusBadRequest, Response{
 				Success: false,
 				Message: "File must be .jpg, .jpeg, or .png",
@@ -121,24 +137,20 @@ func EditProfile(ctx *gin.Context) {
 			return
 		}
 
-		// Validasi size
-		maxfile := 1 * 1024 * 1024
-		if file.Size > int64(maxfile) {
+		if file.Size > 1*1024*1024 {
 			ctx.JSON(http.StatusBadRequest, Response{
 				Success: false,
-				Message: "File is too large (max 1MB)",
+				Message: "File too large (max 1MB)",
 			})
 			return
 		}
 
-		// Simpan file
-		storedFile = fmt.Sprintf("%s.%s", filename, ext)
+		storedFile := fmt.Sprintf("%s%s", filename, ext)
 		savePath := fmt.Sprintf("upload/profile/%s", storedFile)
-		err = ctx.SaveUploadedFile(file, savePath)
-		if err != nil {
+		if saveErr := ctx.SaveUploadedFile(file, savePath); saveErr != nil {
 			ctx.JSON(http.StatusInternalServerError, Response{
 				Success: false,
-				Message: "Failed to save file",
+				Message: "Failed to save image",
 			})
 			return
 		}
@@ -146,12 +158,13 @@ func EditProfile(ctx *gin.Context) {
 		profile.Image = storedFile
 	}
 
+	// Hash password jika ada
 	if profile.Password != "" {
-		hash := lib.CreateHash(profile.Password)
-		profile.Password = hash
+		profile.Password = lib.CreateHash(profile.Password)
 	}
 
-	err = models.UpdateDataUser(profile, val.(int))
+	// ✅ Panggil update dan dapatkan data hasil update
+	profileData, err := models.UpdateDataUser(profile, userId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, Response{
 			Success: false,
@@ -163,8 +176,10 @@ func EditProfile(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, Response{
 		Success: true,
 		Message: "Update User Success",
+		Results: profileData,
 	})
 }
+
 func EditRoleUser(ctx *gin.Context) {
 	idParam := ctx.Param("id")
 	id, err := strconv.Atoi(idParam)
